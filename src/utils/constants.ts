@@ -1,8 +1,16 @@
 import { Dimensions } from "react-native";
 
-// Screen Dimensions
-export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
-  Dimensions.get("window");
+// Screen Dimensions - funkcja aby uniknąć problemów w testach
+export const getScreenDimensions = () => {
+  try {
+    return Dimensions.get("window");
+  } catch {
+    // Fallback dla środowiska testowego
+    return { width: 400, height: 800 };
+  }
+};
+
+export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = getScreenDimensions();
 
 // Colors - Clean Modern palette
 export const COLORS = {

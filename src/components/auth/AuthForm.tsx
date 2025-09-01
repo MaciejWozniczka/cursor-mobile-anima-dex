@@ -71,9 +71,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, isLoading }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>
-          {mode === "login" ? "Zaloguj się" : "Zarejestruj się"}
-        </Text>
         <Text style={styles.subtitle}>
           {mode === "login"
             ? "Witaj ponownie w Animal Dex!"
@@ -138,6 +135,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, isLoading }) => {
               style={styles.passwordToggle}
               onPress={togglePasswordVisibility}
               disabled={isLoading}
+              testID="eye-button"
             >
               <Ionicons
                 name={showPassword ? "eye-off" : "eye"}
@@ -183,15 +181,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: SPACING.xl,
   },
-  title: {
-    fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.weights.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-  },
   subtitle: {
-    fontSize: FONTS.sizes.md,
-    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.lg,
+    fontWeight: FONTS.weights.medium,
+    color: COLORS.textPrimary,
     textAlign: "center",
     lineHeight: 22,
   },

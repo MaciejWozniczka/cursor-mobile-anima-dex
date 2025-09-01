@@ -1,22 +1,17 @@
 module.exports = {
-  preset: 'jest-expo',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js', '<rootDir>/tests/setup.ts'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|expo|@expo|@react-navigation)/)',
-  ],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  testMatch: ['**/tests/**/*.test.(ts|tsx|js|jsx)'],
+  preset: "ts-jest",
+  testEnvironment: "node",
+  testMatch: ["**/tests/**/*.test.(ts|tsx)"],
   collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts',
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/index.ts",
   ],
-  coverageDirectory: 'coverage',
-  testEnvironment: 'node',
+  coverageDirectory: "coverage",
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^react-native-safe-area-context$": "<rootDir>/tests/__mocks__/react-native-safe-area-context.ts",
+    "^@expo/vector-icons$": "<rootDir>/tests/__mocks__/expo-vector-icons.ts",
   },
-  transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
-  },
+  // setupFiles: ["<rootDir>/tests/setup.ts"], // Usunięte - problemy z globalnym mockiem
 };

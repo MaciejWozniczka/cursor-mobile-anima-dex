@@ -143,6 +143,7 @@ const GalleryScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
+        testID="badge-list"
         data={badges}
         renderItem={renderBadgeItem}
         keyExtractor={(item) => item.id}

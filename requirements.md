@@ -1,9 +1,11 @@
 # Animal Dex - Mobile App Requirements & PRD
 
 ## Project Overview
+
 Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwiająca użytkownikom odkrywanie i kolekcjonowanie zwierząt poprzez fotografowanie ich aparatem telefonu. Aplikacja wykorzystuje AI do identyfikacji zwierząt i generuje personalizowane odznaki za każde odkrycie.
 
 ## Tech Stack
+
 - **Frontend**: React Native + Expo
 - **IDE**: Cursor AI
 - **Backend/Automation**: n8n (istniejące endpointy)
@@ -15,12 +17,14 @@ Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwi
 ## Core Features
 
 ### 1. Authentication System
+
 - **Login/Register**: Email/password lub social login (Google/Apple)
 - **User Profile**: Podstawowe informacje użytkownika
 - **Session Management**: Bezpieczne przechowywanie tokenów
 - **Logout**: Wylogowanie z czyszczeniem danych lokalnych
 
 ### 2. Camera & Photo Capture
+
 - **Native Camera**: Integracja z Expo Camera
 - **Photo Capture**: Robienie zdjęć zwierząt w wysokiej jakości
 - **Image Preview**: Podgląd zrobionego zdjęcia przed wysłaniem
@@ -28,6 +32,7 @@ Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwi
 - **Permissions**: Obsługa uprawnień do aparatu
 
 ### 3. Animal Recognition & Badge Generation Flow
+
 - **Photo Upload**: Wysyłanie zdjęć jako multipart/form-data do pierwszego endpointu
 - **Species Detection**: Otrzymanie nazwy i opisu zwierzęcia z API
 - **Badge Generation**: Automatyczne generowanie odznaki przez drugi endpoint
@@ -37,6 +42,7 @@ Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwi
 - **Success Flow**: Płynne przejście od zdjęcia do zapisanej odznaki
 
 ### 4. Badge Generation & Storage System
+
 - **Dynamic Badge Creation**: Automatyczne pobieranie odznak z endpointu n8n
 - **Binary Image Handling**: Konwersja plików binarnych do base64 dla storage
 - **Local Persistence**: Trwałe przechowywanie w AsyncStorage (offline access)
@@ -46,6 +52,7 @@ Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwi
 - **Unique Collection**: Każde zwierzę może być odkryte tylko raz
 
 ### 5. Collection Management & Local Storage
+
 - **Local Badge Storage**: Przechowywanie odznak w AsyncStorage
 - **Badge Gallery**: Przegląd wszystkich lokalnie zapisanych odznak
 - **Search & Filter**: Wyszukiwanie po nazwie zwierzęcia, dacie odkrycia
@@ -57,6 +64,7 @@ Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwi
 - **Duplicate Detection**: Sprawdzanie czy zwierzę już zostało odkryte
 
 ### 6. Discovery Experience
+
 - **Photo Analysis Flow**: Płynny przepływ od zdjęcia do odznaki
 - **Loading States**: Przyjemne animacje podczas analizy
 - **Success Animation**: Efektowne potwierdzenie odkrycia
@@ -66,6 +74,7 @@ Animal Dex to mobilna aplikacja typu "Pokedex" dla realnych zwierząt, umożliwi
 ## Technical Specifications
 
 ### Project Structure
+
 ```
 animal-dex/
 ├── src/
@@ -82,7 +91,7 @@ animal-dex/
 │   │   └── ProfileScreen.tsx
 │   ├── services/
 │   │   ├── api.ts           // Obsługa endpointów n8n
-│   │   ├── auth.ts          // Autentykacja użytkowników  
+│   │   ├── auth.ts          // Autentykacja użytkowników
 │   │   ├── storage.ts       // AsyncStorage dla odznak
 │   │   ├── camera.ts        // Obsługa aparatu i zdjęć
 │   │   └── badges.ts        // Logika zarządzania odznakami
@@ -97,6 +106,7 @@ animal-dex/
 ```
 
 ### Required Dependencies
+
 ```json
 {
   "@expo/vector-icons": "latest",
@@ -121,24 +131,25 @@ animal-dex/
 ```
 
 ### API Endpoints (n8n Integration)
+
 ```typescript
 interface APIEndpoints {
   // Identyfikacja zwierzęcia (multipart/form-data)
   identifyAnimal: {
-    method: 'POST';
-    url: 'https://andrzej210-20210.wykr.es/webhook/c30c62ee-7f2e-435c-972c-2873603e0226';
-    contentType: 'multipart/form-data';
+    method: "POST";
+    url: "https://andrzej210-20210.wykr.es/webhook/c30c62ee-7f2e-435c-972c-2873603e0226";
+    contentType: "multipart/form-data";
     body: FormData; // image file as form field
     response: {
-      name: string;        // nazwa zwierzęcia
+      name: string; // nazwa zwierzęcia
       description: string; // opis zwierzęcia
     };
   };
 
   // Generowanie odznaki (query parameter)
   generateBadge: {
-    method: 'GET';
-    url: 'https://andrzej210-20210.wykr.es/webhook-test/a56adba0-37af-40b9-941a-3db55e4fc028';
+    method: "GET";
+    url: "https://andrzej210-20210.wykr.es/webhook-test/a56adba0-37af-40b9-941a-3db55e4fc028";
     params: { name: string }; // nazwa zwierzęcia z pierwszego endpointu
     response: Blob | ArrayBuffer; // binarny plik obrazu (gemini)
   };
@@ -146,12 +157,12 @@ interface APIEndpoints {
 
 // Lokalne typy danych
 interface StoredBadge {
-  id: string;              // unikalny identyfikator
-  animalName: string;      // nazwa z API
-  description: string;     // opis z API
-  imageBlob: string;       // base64 encoded image data
-  discoveredAt: string;    // ISO timestamp
-  originalPhoto?: string;  // base64 zdjęcia użytkownika (opcjonalnie)
+  id: string; // unikalny identyfikator
+  animalName: string; // nazwa z API
+  description: string; // opis z API
+  imageBlob: string; // base64 encoded image data
+  discoveredAt: string; // ISO timestamp
+  originalPhoto?: string; // base64 zdjęcia użytkownika (opcjonalnie)
 }
 
 interface BadgeCollection {
@@ -164,8 +175,9 @@ interface BadgeCollection {
 ## Screen Specifications
 
 ### 1. AuthScreen
+
 - **Purpose**: Logowanie i rejestracja użytkowników
-- **Elements**: 
+- **Elements**:
   - Email/password inputs
   - Login/Register buttons
   - Social auth buttons
@@ -174,6 +186,7 @@ interface BadgeCollection {
 - **Navigation**: Po zalogowaniu -> CameraScreen
 
 ### 2. CameraScreen (Main Screen)
+
 - **Purpose**: Główny ekran do robienia zdjęć
 - **Elements**:
   - Full-screen camera preview
@@ -187,6 +200,7 @@ interface BadgeCollection {
 - **State**: Camera permissions, photo capture state
 
 ### 3. AnalysisScreen
+
 - **Purpose**: Analiza zdjęcia i prezentacja wyniku
 - **Elements**:
   - Captured photo preview
@@ -197,6 +211,7 @@ interface BadgeCollection {
 - **Error States**: "Unknown species", "Poor quality", API errors
 
 ### 4. GalleryScreen
+
 - **Purpose**: Przegląd kolekcji odznak
 - **Elements**:
   - Grid layout odznak
@@ -208,6 +223,7 @@ interface BadgeCollection {
 - **Performance**: Lazy loading, image optimization
 
 ### 5. BadgeDetailScreen
+
 - **Purpose**: Szczegóły konkretnej odznaki
 - **Elements**:
   - Large badge image
@@ -218,6 +234,7 @@ interface BadgeCollection {
 - **Data**: Full species info, user discovery metadata
 
 ### 6. ProfileScreen
+
 - **Purpose**: Profil użytkownika i ustawienia
 - **Elements**:
   - User avatar/name
@@ -229,6 +246,7 @@ interface BadgeCollection {
 ## UI/UX Guidelines
 
 ### Design System
+
 - **Color Palette**: Nature-inspired (greens, browns, blues)
 - **Typography**: Clean, readable fonts (System default)
 - **Iconography**: Consistent icon family (@expo/vector-icons)
@@ -236,6 +254,7 @@ interface BadgeCollection {
 - **Animations**: Smooth transitions (react-native-reanimated)
 
 ### User Experience Principles
+
 - **Intuitive Navigation**: Clear bottom tab structure
 - **Quick Actions**: One-tap photo capture
 - **Visual Feedback**: Loading states, success animations
@@ -243,6 +262,7 @@ interface BadgeCollection {
 - **Offline Support**: Basic functionality without internet
 
 ### Responsive Design
+
 - **Target Devices**: iOS/Android phones
 - **Screen Sizes**: Support from iPhone SE to large Android phones
 - **Orientation**: Portrait-first, camera landscape option
@@ -251,6 +271,7 @@ interface BadgeCollection {
 ## Development Guidelines
 
 ### Code Standards
+
 - **TypeScript**: Strict mode enabled
 - **ESLint**: Airbnb configuration
 - **Prettier**: Code formatting
@@ -258,6 +279,7 @@ interface BadgeCollection {
 - **State Management**: React Query + useState/useContext
 
 ### Performance Requirements
+
 - **App Launch**: < 3 seconds cold start
 - **Photo Capture**: < 1 second response
 - **API Calls**: Proper caching and retry logic
@@ -265,6 +287,7 @@ interface BadgeCollection {
 - **Battery Life**: Optimized camera usage
 
 ### Testing Strategy
+
 - **Unit Tests**: Critical business logic
 - **Integration Tests**: API connections
 - **E2E Tests**: Key user flows
@@ -273,12 +296,14 @@ interface BadgeCollection {
 ## Security & Privacy
 
 ### Data Protection
+
 - **User Authentication**: Secure token storage
 - **API Security**: Proper headers and HTTPS
 - **Image Handling**: Temporary storage, auto-cleanup
 - **Location Data**: Optional, user consent required
 
 ### Privacy Compliance
+
 - **Permissions**: Camera, location (optional)
 - **Data Collection**: Minimal, purpose-specific
 - **User Control**: Data deletion options
@@ -287,12 +312,14 @@ interface BadgeCollection {
 ## Deployment & Distribution
 
 ### Build Configuration
+
 - **Expo EAS Build**: Production builds
 - **Environment Variables**: API endpoints, keys
 - **App Icons**: Multiple sizes, platform-specific
 - **Splash Screen**: Branded loading screen
 
 ### Release Strategy
+
 - **Beta Testing**: Internal testing phase
 - **App Store Submission**: iOS App Store, Google Play
 - **Version Management**: Semantic versioning
@@ -301,12 +328,14 @@ interface BadgeCollection {
 ## Success Metrics
 
 ### Key Performance Indicators
+
 - **User Engagement**: Daily active users, session length
 - **Feature Usage**: Photos captured, badges collected
 - **Technical Performance**: Crash rate, API response times
 - **User Satisfaction**: App store ratings, user feedback
 
 ### Analytics Events
+
 ```typescript
 interface AnalyticsEvents {
   photo_captured: { species?: string; confidence?: number };
@@ -317,10 +346,9 @@ interface AnalyticsEvents {
 ```
 
 ## Future Enhancements (Phase 2)
+
 - Social features (sharing discoveries)
 - Leaderboards and challenges
-- Offline species database
-- AR visualization of animals
 - Community-driven species verification
 - Advanced filtering and search
 - Export collection functionality
@@ -368,7 +396,7 @@ class AnimalAPI {
 // services/badges.ts - zarządzanie odznakami
 class BadgeManager {
   private static STORAGE_KEY = 'animal_badges';
-  
+
   async saveBadge(animalName: string, description: string, imageBuffer: ArrayBuffer): Promise<void> {
     const base64Image = this.arrayBufferToBase64(imageBuffer);
     const badge: StoredBadge = {
@@ -378,7 +406,7 @@ class BadgeManager {
       imageBlob: base64Image,
       discoveredAt: new Date().toISOString(),
     };
-    
+
     const existingBadges = await this.getBadges();
     const updatedBadges = [...existingBadges, badge];
     await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedBadges));
@@ -425,3 +453,4 @@ class BadgeManager {
 - Badge generation and storage
 - User authentication flow
 - Navigation between screens
+```

@@ -4,111 +4,157 @@
 
 ```
 tests/
-├── setup.ts                 # Konfiguracja globalna testów
-├── services/                # Testy serwisów
-│   ├── auth.test.ts        # Testy AuthService
-│   ├── api.test.ts         # Testy AnimalAPI
-│   └── badges.test.ts      # Testy BadgeService
-├── components/              # Testy komponentów
-│   └── AuthScreen.test.tsx # Testy AuthScreen
-└── utils/                   # Testy funkcji pomocniczych
-    └── helpers.test.ts      # Testy helpers
+├── utils/                   # Testy funkcji pomocniczych
+│   ├── helpers.test.ts      # Testy helpers (kompleksowe)
+│   └── constants.test.ts    # Testy stałych aplikacji
+├── types/                   # Testy typów TypeScript
+│   └── index.test.ts        # Testy interfejsów i typów
+├── components/              # Testy komponentów React
+│   ├── LoadingScreen.test.tsx # Testy LoadingScreen
+│   ├── BadgeCard.test.tsx     # Testy BadgeCard
+│   └── AuthForm.test.tsx      # Testy AuthForm
+└── README.md                # Ten plik
 ```
 
 ## Uruchamianie testów
 
 ### Wszystkie testy
+
 ```bash
 npm test
 ```
 
 ### Testy w trybie watch
+
 ```bash
 npm run test:watch
 ```
 
 ### Testy z pokryciem kodu
+
 ```bash
 npm run test:coverage
 ```
 
 ### Pojedynczy plik testowy
+
 ```bash
-npm test -- tests/services/auth.test.ts
+npm test -- tests/utils/helpers.test.ts
 ```
 
 ## Konfiguracja
 
 ### Jest
-- Używa `jest-expo` jako preset
-- Konfiguracja w `jest.config.js`
-- Setup w `jest.setup.js` i `tests/setup.ts`
 
-### Babel
-- Konfiguracja w `babel.config.js`
-- Wsparcie dla aliasów ścieżek (`@/`)
+- Używa `ts-jest` jako preset
+- Konfiguracja w `jest.config.js`
+- Testy uruchamiane w środowisku Node.js
 
 ### TypeScript
-- Konfiguracja testowa w `tsconfig.test.json`
-- Rozszerza główny `tsconfig.json`
+
+- Wsparcie dla TypeScript przez `ts-jest`
+- Konfiguracja w `tsconfig.json`
+
+## Aktualny stan
+
+Testy są w fazie aktywnego rozwoju i pokrywają większość głównych funkcjonalności aplikacji.
+
+### Działające testy
+
+- ✅ **Funkcje pomocnicze** (helpers) - 25+ testów
+- ✅ **Stałe aplikacji** (constants) - 15+ testów
+- ✅ **Typy TypeScript** (types) - 20+ testów
+- ✅ **Komponenty React** (components) - 15+ testów
+- ✅ **Konfiguracja TypeScript**
+- ✅ **Mocki dla React Native i Expo**
+
+### Pokrycie kodu
+
+- **Utils**: ~80% (funkcje pomocnicze)
+- **Types**: ~90% (interfejsy i typy)
+- **Components**: ~60% (komponenty React)
+- **Services**: ~20% (serwisy - w trakcie rozwoju)
+
+## Szczegóły testów
+
+### Utils/Helpers
+
+- Formatowanie dat i czasu
+- Operacje na stringach i tablicach
+- Konwersja obrazów (ArrayBuffer ↔ base64)
+- Walidacja (email, hasło, base64)
+- Funkcje pomocnicze (debounce, throttle, retry)
+- Generowanie ID i obsługa błędów
+
+### Types
+
+- Interfejsy API (AnimalIdentificationResponse, BadgeGenerationResponse)
+- Typy odznak (StoredBadge, BadgeCollection)
+- Typy użytkownika (User, AuthState)
+- Typy nawigacji (RootStackParamList, MainTabParamList)
+- Typy kamery (CameraState)
+
+### Components
+
+- **LoadingScreen**: renderowanie, wiadomości, struktura
+- **BadgeCard**: różne rozmiary, interakcje, wyświetlanie danych
+- **AuthForm**: logowanie/rejestracja, walidacja, stany ładowania
 
 ## Mocki
 
-### Expo moduły
-- `expo-camera`
-- `expo-image-manipulator`
-- `expo-file-system`
+### React Native
 
-### React Navigation
-- `useNavigation`
-- `useRoute`
-- `useFocusEffect`
+- `View`, `Text`, `TouchableOpacity`, `TextInput`
+- `ActivityIndicator`, `StyleSheet`
+- `Platform.OS` (iOS/Android)
 
-### AsyncStorage
-- Używa `@react-native-async-storage/async-storage/jest/async-storage-mock`
+### Expo
+
+- `@expo/vector-icons` (Ionicons)
+
+### Constants
+
+- Kolory, typografia, spacing, cienie
+- Klucze storage, endpointy API
+- Ustawienia kamery, typy odznak
+
+## Dodawanie nowych testów
+
+1. **Utwórz plik `.test.ts` lub `.test.tsx`** w odpowiednim katalogu
+2. **Dodaj mocki** dla zależności zewnętrznych
+3. **Użyj `describe`, `it`, `expect`** z Jest
+4. **Dodaj `testID`** do komponentów React dla łatwiejszego testowania
+5. **Uruchom testy**: `npm test`
 
 ## Przykłady testów
 
-### Test serwisu
+### Test funkcji pomocniczej
+
 ```typescript
-describe('AuthService', () => {
-  it('should login successfully', async () => {
-    // Arrange
-    const mockResponse = { ok: true, json: () => Promise.resolve({ success: true }) };
-    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
-    
-    // Act
-    const result = await AuthService.login('test@example.com', 'password');
-    
-    // Assert
-    expect(result.isAuthenticated).toBe(true);
+describe("formatDate", () => {
+  it("should format date correctly", () => {
+    const date = new Date("2024-01-15");
+    const result = formatDate(date);
+    expect(result).toContain("15");
+    expect(result).toContain("styczeń");
   });
 });
 ```
 
 ### Test komponentu
+
 ```typescript
-describe('AuthScreen', () => {
-  it('renders login form', () => {
-    const { getByText } = render(<AuthScreen />);
-    expect(getByText('Zaloguj się')).toBeTruthy();
+describe('LoadingScreen', () => {
+  it('should render with default message', () => {
+    const { getByText } = render(<LoadingScreen />);
+    expect(getByText('Ładowanie...')).toBeTruthy();
   });
 });
 ```
 
-## Pokrycie kodu
+## Uwagi
 
-Testy pokrywają:
-- ✅ Serwisy (AuthService, AnimalAPI, BadgeService)
-- ✅ Komponenty (AuthScreen)
-- ✅ Funkcje pomocnicze (helpers)
-- ✅ Logikę biznesową
-- ✅ Obsługę błędów
-- ✅ Scenariusze edge case
-
-## Dodawanie nowych testów
-
-1. Utwórz plik `.test.ts` lub `.test.tsx`
-2. Dodaj odpowiednie mocki w `tests/setup.ts`
-3. Użyj `describe`, `it`, `expect` z Jest
-4. Uruchom testy: `npm test`
+- Testy są uruchamiane w środowisku Node.js, nie w React Native
+- Moduły React Native i Expo są mockowane
+- Dla pełnego testowania aplikacji zalecane jest użycie `jest-expo` lub podobnych narzędzi
+- Testy pokrywają logikę biznesową, walidację i renderowanie komponentów

@@ -50,6 +50,7 @@ const BadgeCard = ({ badge, onPress, size = "medium" }: BadgeCardProps) => {
       style={[styles.container, sizeStyles.container]}
       onPress={() => onPress(badge)}
       activeOpacity={0.8}
+      testID="badge-card"
     >
       <View style={styles.imageContainer}>
         <BadgeImage

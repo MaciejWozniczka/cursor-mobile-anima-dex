@@ -14,10 +14,16 @@ interface LoadingScreenProps {
 
 const LoadingScreen = ({ message = "Ładowanie..." }: LoadingScreenProps) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.loadingCard}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.message}>{message}</Text>
+    <View style={styles.container} testID="loading-container">
+      <View style={styles.loadingCard} testID="loading-card">
+        <ActivityIndicator
+          size="large"
+          color={COLORS.primary}
+          testID="activity-indicator"
+        />
+        <Text style={styles.message} testID="loading-message">
+          {message}
+        </Text>
       </View>
     </View>
   );

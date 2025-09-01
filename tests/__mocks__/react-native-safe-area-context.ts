@@ -1,0 +1,8 @@
+export const SafeAreaView = "SafeAreaView";
+export const SafeAreaProvider = "SafeAreaProvider";
+export const useSafeAreaInsets = () => ({
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+});

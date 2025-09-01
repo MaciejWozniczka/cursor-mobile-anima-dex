@@ -19,7 +19,7 @@ const CameraPreview = ({
   children,
 }: CameraPreviewProps) => {
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="camera-preview">
       <CameraView
         ref={cameraRef}
         style={styles.camera}
