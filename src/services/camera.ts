@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import { Camera } from "expo-camera";
 import * as ImageManipulator from "expo-image-manipulator";
 import { CAMERA } from "@/utils/constants";
@@ -168,14 +169,9 @@ class CameraService {
    * Pobranie dostępnych typów aparatów
    */
   async getAvailableCameraTypes(): Promise<string[]> {
-    try {
-      // W expo-camera 16.x nie ma getAvailableCameraTypesAsync
-      // Domyślnie zwracamy dostępne typy
-      return ["back", "front"];
-    } catch (error) {
-      console.error("Error getting available camera types:", error);
-      return ["back"]; // Domyślnie aparat tylny
-    }
+    // W expo-camera 16.x nie ma getAvailableCameraTypesAsync
+    // Domyślnie zwracamy dostępne typy
+    return ["back", "front"];
   }
 
   /**

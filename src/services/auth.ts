@@ -286,6 +286,7 @@ class AuthService {
   /**
    * Resetowanie hasła (placeholder)
    */
+  // eslint-disable-next-line class-methods-use-this
   async resetPassword(email: string): Promise<boolean> {
     try {
       // TODO: Implementacja resetowania hasła
@@ -300,6 +301,7 @@ class AuthService {
   /**
    * Walidacja tokenu
    */
+  // eslint-disable-next-line class-methods-use-this
   async validateToken(token: string): Promise<boolean> {
     try {
       // TODO: Implementacja walidacji tokenu z serwerem

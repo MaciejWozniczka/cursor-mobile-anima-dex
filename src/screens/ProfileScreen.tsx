@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 
 import {
   COLORS,
@@ -24,7 +23,6 @@ import BadgeService from "@/services/badges";
 import LoadingScreen from "@/components/common/LoadingScreen";
 
 const ProfileScreen: React.FC = () => {
-  const navigation = useNavigation();
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState({
     totalBadges: 0,

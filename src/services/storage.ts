@@ -341,13 +341,15 @@ class StorageService {
 
       // Usuń wszystkie pliki w katalogu badges
       const files = await FileSystem.readDirectoryAsync(this.badgesDir);
-      for (const file of files) {
-        try {
-          await FileSystem.deleteAsync(`${this.badgesDir}${file}`);
-        } catch (fileError) {
-          console.warn("⚠️ Nie udało się usunąć pliku:", file, fileError);
-        }
-      }
+      await Promise.allSettled(
+        files.map(async (file) => {
+          try {
+            await FileSystem.deleteAsync(`${this.badgesDir}${file}`);
+          } catch (fileError) {
+            console.warn("⚠️ Nie udało się usunąć pliku:", file, fileError);
+          }
+        })
+      );
 
       console.log("✅ Wszystkie odznaki zostały usunięte");
       return true;
@@ -358,6 +360,7 @@ class StorageService {
   }
 
   // Pobierz URI obrazu odznaki
+  // eslint-disable-next-line class-methods-use-this
   async getBadgeImageUri(badge: StoredBadge): Promise<string> {
     try {
       // Sprawdź czy plik istnieje
@@ -386,26 +389,38 @@ class StorageService {
       let totalSize = 0;
 
       // Oblicz rozmiar plików obrazów
-      for (const badge of badges) {
-        try {
-          const fileInfo = await FileSystem.getInfoAsync(badge.imageBlob);
-          if (fileInfo.exists) {
-            totalSize += fileInfo.size || 0;
-          }
-
-          // Dodaj rozmiar oryginalnego zdjęcia
-          if (badge.originalPhoto) {
-            const originalFileInfo = await FileSystem.getInfoAsync(
-              badge.originalPhoto
-            );
-            if (originalFileInfo.exists) {
-              totalSize += originalFileInfo.size || 0;
+      const sizes = await Promise.allSettled(
+        badges.map(async (badge) => {
+          try {
+            const fileInfo = await FileSystem.getInfoAsync(badge.imageBlob);
+            let size = 0;
+            if (fileInfo.exists) {
+              size += fileInfo.size || 0;
             }
+
+            // Dodaj rozmiar oryginalnego zdjęcia
+            if (badge.originalPhoto) {
+              const originalFileInfo = await FileSystem.getInfoAsync(
+                badge.originalPhoto
+              );
+              if (originalFileInfo.exists) {
+                size += originalFileInfo.size || 0;
+              }
+            }
+            return size;
+          } catch (error) {
+            console.warn("⚠️ Nie udało się pobrać rozmiaru pliku:", error);
+            return 0;
           }
-        } catch (error) {
-          console.warn("⚠️ Nie udało się pobrać rozmiaru pliku:", error);
+        })
+      );
+
+      totalSize = sizes.reduce((sum, result) => {
+        if (result.status === "fulfilled") {
+          return sum + result.value;
         }
-      }
+        return sum;
+      }, 0);
 
       return {
         totalBadges: badges.length,
@@ -467,19 +482,37 @@ class StorageService {
         }
 
         // Sprawdź czy wszystkie pliki obrazów istnieją
-        const validBadges = [];
-        for (const badge of badges) {
-          try {
-            const imageInfo = await FileSystem.getInfoAsync(badge.imageBlob);
-            if (imageInfo.exists) {
-              validBadges.push(badge);
-            } else {
-              console.warn("⚠️ Plik obrazu nie istnieje:", badge.imageBlob);
+        const badgeChecks = await Promise.allSettled(
+          badges.map(async (badge) => {
+            try {
+              const imageInfo = await FileSystem.getInfoAsync(badge.imageBlob);
+              if (imageInfo.exists) {
+                return { valid: true, badge };
+              } else {
+                console.warn("⚠️ Plik obrazu nie istnieje:", badge.imageBlob);
+                return { valid: false, badge };
+              }
+            } catch (error) {
+              console.warn(
+                "⚠️ Błąd sprawdzania pliku:",
+                badge.imageBlob,
+                error
+              );
+              return { valid: false, badge };
             }
-          } catch (error) {
-            console.warn("⚠️ Błąd sprawdzania pliku:", badge.imageBlob, error);
-          }
-        }
+          })
+        );
+
+        const validBadges = badgeChecks
+          .filter(
+            (
+              result
+            ): result is PromiseFulfilledResult<{
+              valid: boolean;
+              badge: any;
+            }> => result.status === "fulfilled" && result.value.valid
+          )
+          .map((result) => result.value.badge);
 
         if (validBadges.length !== badges.length) {
           console.warn(
@@ -522,6 +555,7 @@ class StorageService {
   }
 
   // User Management (pozostaje AsyncStorage)
+  // eslint-disable-next-line class-methods-use-this
   async saveUser(user: User): Promise<void> {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
@@ -531,6 +565,7 @@ class StorageService {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async getUser(): Promise<User | null> {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.USER);
@@ -541,6 +576,7 @@ class StorageService {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async clearUser(): Promise<void> {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.USER);
@@ -550,6 +586,7 @@ class StorageService {
   }
 
   // Auth Token Management (pozostaje AsyncStorage)
+  // eslint-disable-next-line class-methods-use-this
   async saveAuthToken(token: string): Promise<void> {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
@@ -559,6 +596,7 @@ class StorageService {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async getAuthToken(): Promise<string | null> {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -568,6 +606,7 @@ class StorageService {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async clearAuthToken(): Promise<void> {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -577,6 +616,7 @@ class StorageService {
   }
 
   // Settings Management (pozostaje AsyncStorage)
+  // eslint-disable-next-line class-methods-use-this
   async saveSettings(settings: Record<string, any>): Promise<void> {
     try {
       await AsyncStorage.setItem(
@@ -589,6 +629,7 @@ class StorageService {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   async getSettings(): Promise<Record<string, any>> {
     try {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);

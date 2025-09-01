@@ -1,57 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '@/utils/constants';
-import { isValidEmail, isValidPassword } from '@/utils/helpers';
+import {
+  COLORS,
+  FONTS,
+  SPACING,
+  BORDER_RADIUS,
+  SHADOWS,
+} from "@/utils/constants";
+import { isValidEmail, isValidPassword } from "@/utils/helpers";
 
 interface AuthFormProps {
-  mode: 'login' | 'register';
+  mode: "login" | "register";
   onSubmit: (email: string, password: string) => void;
   isLoading: boolean;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({
-  mode,
-  onSubmit,
-  isLoading,
-}) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, isLoading }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const validateForm = (): boolean => {
     let isValid = true;
 
     // Walidacja email
     if (!email.trim()) {
-      setEmailError('Email jest wymagany');
+      setEmailError("Email jest wymagany");
       isValid = false;
     } else if (!isValidEmail(email)) {
-      setEmailError('Nieprawidłowy format email');
+      setEmailError("Nieprawidłowy format email");
       isValid = false;
     } else {
-      setEmailError('');
+      setEmailError("");
     }
 
     // Walidacja hasła
     if (!password.trim()) {
-      setPasswordError('Hasło jest wymagane');
+      setPasswordError("Hasło jest wymagane");
       isValid = false;
     } else if (!isValidPassword(password)) {
-      setPasswordError('Hasło musi mieć co najmniej 6 znaków');
+      setPasswordError("Hasło musi mieć co najmniej 6 znaków");
       isValid = false;
     } else {
-      setPasswordError('');
+      setPasswordError("");
     }
 
     return isValid;
@@ -71,13 +72,12 @@ const AuthForm: React.FC<AuthFormProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>
-          {mode === 'login' ? 'Zaloguj się' : 'Zarejestruj się'}
+          {mode === "login" ? "Zaloguj się" : "Zarejestruj się"}
         </Text>
         <Text style={styles.subtitle}>
-          {mode === 'login' 
-            ? 'Witaj ponownie w Animal Dex!' 
-            : 'Dołącz do społeczności odkrywców zwierząt!'
-          }
+          {mode === "login"
+            ? "Witaj ponownie w Animal Dex!"
+            : "Dołącz do społeczności odkrywców zwierząt!"}
         </Text>
       </View>
 
@@ -85,10 +85,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
         {/* Email Input */}
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
-            <Ionicons 
-              name="mail-outline" 
-              size={20} 
-              color={COLORS.textSecondary} 
+            <Ionicons
+              name="mail-outline"
+              size={20}
+              color={COLORS.textSecondary}
               style={styles.inputIcon}
             />
             <TextInput
@@ -98,7 +98,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
-                if (emailError) setEmailError('');
+                if (emailError) setEmailError("");
               }}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -114,10 +114,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
         {/* Password Input */}
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
-            <Ionicons 
-              name="lock-closed-outline" 
-              size={20} 
-              color={COLORS.textSecondary} 
+            <Ionicons
+              name="lock-closed-outline"
+              size={20}
+              color={COLORS.textSecondary}
               style={styles.inputIcon}
             />
             <TextInput
@@ -127,7 +127,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
               value={password}
               onChangeText={(text) => {
                 setPassword(text);
-                if (passwordError) setPasswordError('');
+                if (passwordError) setPasswordError("");
               }}
               secureTextEntry={!showPassword}
               autoCapitalize="none"
@@ -140,7 +140,7 @@ const AuthForm: React.FC<AuthFormProps> = ({
               disabled={isLoading}
             >
               <Ionicons
-                name={showPassword ? 'eye-off' : 'eye'}
+                name={showPassword ? "eye-off" : "eye"}
                 size={20}
                 color={COLORS.textSecondary}
               />
@@ -153,16 +153,20 @@ const AuthForm: React.FC<AuthFormProps> = ({
 
         {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton,
+            isLoading && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
           disabled={isLoading}
           activeOpacity={0.8}
         >
           <Text style={styles.submitButtonText}>
-            {isLoading 
-              ? 'Przetwarzanie...' 
-              : mode === 'login' ? 'Zaloguj się' : 'Zarejestruj się'
-            }
+            {isLoading
+              ? "Przetwarzanie..."
+              : mode === "login"
+                ? "Zaloguj się"
+                : "Zarejestruj się"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -176,7 +180,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: SPACING.xl,
   },
   title: {
@@ -188,7 +192,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: FONTS.sizes.md,
     color: COLORS.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
   },
   form: {
@@ -198,8 +202,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.white,
     borderRadius: BORDER_RADIUS.md,
     borderWidth: 1,
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     borderRadius: BORDER_RADIUS.md,
     paddingVertical: SPACING.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: SPACING.lg,
     ...SHADOWS.medium,
   },

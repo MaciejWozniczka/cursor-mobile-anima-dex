@@ -110,6 +110,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = ({
           }}
         >
           {(props) => (
+            // eslint-disable-next-line react/jsx-props-no-spreading
             <AuthScreen {...props} updateAuthState={updateAuthState} />
           )}
         </Stack.Screen>

@@ -12,9 +12,7 @@ interface LoadingScreenProps {
   message?: string;
 }
 
-const LoadingScreen: React.FC<LoadingScreenProps> = ({
-  message = "Ładowanie...",
-}) => {
+const LoadingScreen = ({ message = "Ładowanie..." }: LoadingScreenProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.loadingCard}>
@@ -50,5 +48,9 @@ const styles = StyleSheet.create({
     fontWeight: FONTS.weights.medium,
   },
 });
+
+LoadingScreen.defaultProps = {
+  message: "Ładowanie...",
+};
 
 export default LoadingScreen;

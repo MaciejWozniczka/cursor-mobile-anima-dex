@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 import {
   COLORS,
@@ -18,7 +17,7 @@ interface BadgeUnlockAnimationProps {
   onAnimationComplete: () => void;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const BadgeUnlockAnimation: React.FC<BadgeUnlockAnimationProps> = ({
   badge,

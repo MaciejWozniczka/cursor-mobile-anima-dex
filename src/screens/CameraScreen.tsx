@@ -181,21 +181,6 @@ const CameraScreen: React.FC = () => {
     });
   };
 
-  const resetCamera = () => {
-    console.log("🔄 Resetting camera...");
-    setIsCameraReady(false);
-
-    // Wyczyść referencję do kamery
-    if (cameraRef.current) {
-      cameraRef.current = null;
-    }
-
-    // Krótkie opóźnienie przed reinicjalizacją
-    setTimeout(() => {
-      initializeCamera();
-    }, 100);
-  };
-
   // Funkcja do wymuszenia reinicjalizacji kamery
   const forceReinitialize = () => {
     console.log("🔄 Force reinitializing camera...");

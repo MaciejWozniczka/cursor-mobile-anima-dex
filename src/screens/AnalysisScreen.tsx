@@ -5,13 +5,11 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useRoute, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types";
@@ -25,7 +23,6 @@ import {
 } from "@/utils/constants";
 import { StoredBadge } from "@/types";
 import BadgeService from "@/services/badges";
-import LoadingScreen from "@/components/common/LoadingScreen";
 import BadgeUnlockAnimation from "@/components/badges/BadgeUnlockAnimation";
 import BadgeImage from "@/components/badges/BadgeImage";
 
@@ -40,7 +37,7 @@ interface AnalysisScreenProps {
   route: AnalysisScreenRouteProp;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
   navigation,
@@ -88,7 +85,7 @@ const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
 
   const handleBackToCamera = () => {
     // Przejdź do kamery z resetowaniem
-    navigation.navigate("Main", {
+    (navigation as any).navigate("Main", {
       screen: "Camera",
       params: { resetCamera: true },
     });
@@ -100,7 +97,7 @@ const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
 
   const handleBadgePress = () => {
     // Przenieś do ekranu listy odznak (Gallery)
-    navigation.navigate("Main", { screen: "Gallery" });
+    (navigation as any).navigate("Main", { screen: "Gallery" });
   };
 
   // Animacja zdobycia odznaki

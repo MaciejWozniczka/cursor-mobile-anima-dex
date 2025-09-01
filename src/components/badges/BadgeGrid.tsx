@@ -10,6 +10,7 @@ import { COLORS, SPACING } from '@/utils/constants';
 import { StoredBadge } from '@/types';
 import BadgeCard from './BadgeCard';
 
+// eslint-disable-next-line react/require-default-props
 interface BadgeGridProps {
   badges: StoredBadge[];
   onBadgePress: (badge: StoredBadge) => void;

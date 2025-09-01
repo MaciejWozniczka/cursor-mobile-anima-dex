@@ -1,0 +1,12 @@
+# Coverage reports
+coverage/
+
+# Jest cache
+.jest/
+
+# Test results
+test-results/
+
+# Temporary files
+*.tmp
+*.temp

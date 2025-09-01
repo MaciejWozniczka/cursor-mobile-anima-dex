@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useRoute, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types";
@@ -22,7 +21,6 @@ import {
   BORDER_RADIUS,
   SHADOWS,
 } from "@/utils/constants";
-import { StoredBadge } from "@/types";
 import { formatDateTime } from "@/utils/helpers";
 import BadgeService from "@/services/badges";
 import BadgeImage from "@/components/badges/BadgeImage";

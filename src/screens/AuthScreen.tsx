@@ -29,7 +29,7 @@ interface AuthScreenProps {
 }
 
 const AuthScreen: React.FC<AuthScreenProps> = ({
-  navigation,
+  navigation: _navigation,
   updateAuthState,
 }) => {
   const [isLogin, setIsLogin] = useState(true);

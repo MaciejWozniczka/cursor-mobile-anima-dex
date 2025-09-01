@@ -5,6 +5,7 @@ import { StoredBadge } from "@/types";
 import StorageService from "@/services/storage";
 import { COLORS } from "@/utils/constants";
 
+// eslint-disable-next-line react/require-default-props
 interface BadgeImageProps {
   badge: StoredBadge;
   style?: ImageStyle;

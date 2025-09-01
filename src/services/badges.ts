@@ -1,7 +1,7 @@
-import { StoredBadge, AnimalIdentificationResponse } from "@/types";
+/* eslint-disable class-methods-use-this */
+import { StoredBadge } from "@/types";
 import AnimalAPI from "./api";
 import StorageService from "./storage";
-import { generateId } from "@/utils/helpers";
 
 class BadgeService {
   private static instance: BadgeService;
@@ -18,6 +18,7 @@ class BadgeService {
   /**
    * Główny proces odkrywania zwierzęcia i generowania odznaki
    */
+  // eslint-disable-next-line class-methods-use-this
   async discoverAnimal(photoUri: string): Promise<StoredBadge> {
     try {
       // Krok 1: Identyfikacja zwierzęcia

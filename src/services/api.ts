@@ -1,4 +1,4 @@
-import { AnimalIdentificationResponse, AppError } from "@/types";
+import { AnimalIdentificationResponse } from "@/types";
 import { API_ENDPOINTS, API_TIMEOUTS } from "@/utils/constants";
 import { retry, createError, createTimeoutSignal } from "@/utils/helpers";
 
@@ -17,6 +17,7 @@ class AnimalAPI {
   /**
    * Identyfikuje zwierzę na podstawie zdjęcia
    */
+  // eslint-disable-next-line class-methods-use-this
   async identifyAnimal(
     imageUri: string
   ): Promise<AnimalIdentificationResponse> {
@@ -105,6 +106,7 @@ class AnimalAPI {
   /**
    * Generuje odznakę dla zidentyfikowanego zwierzęcia
    */
+  // eslint-disable-next-line class-methods-use-this
   async generateBadge(
     animalName: string
   ): Promise<{ imageData: ArrayBuffer; additionalData?: any }> {
@@ -148,21 +150,16 @@ class AnimalAPI {
         if (responseData.data) {
           // Stara struktura - bezpośrednio pole data
           base64Data = responseData.data;
-        } else if (
-          responseData.candidates &&
-          responseData.candidates[0] &&
-          responseData.candidates[0].content &&
-          responseData.candidates[0].content.parts
-        ) {
+        } else if (responseData.candidates?.[0]?.content?.parts) {
           // Nowa struktura Google Gemini API
-          const parts = responseData.candidates[0].content.parts;
+          const { parts } = responseData.candidates[0].content;
 
           // Znajdź część z inlineData (obraz)
-          for (const part of parts) {
-            if (part.inlineData && part.inlineData.data) {
-              base64Data = part.inlineData.data;
-              break;
-            }
+          const partWithImage = parts.find(
+            (part: any) => part.inlineData?.data
+          );
+          if (partWithImage?.inlineData?.data) {
+            base64Data = partWithImage.inlineData.data;
           }
         }
 
@@ -191,13 +188,19 @@ class AnimalAPI {
               additionalData: responseData,
             };
           } catch (conversionError) {
-            console.error("❌ Błąd konwersji base64 na ArrayBuffer:", conversionError);
-            
+            console.error(
+              "❌ Błąd konwersji base64 na ArrayBuffer:",
+              conversionError
+            );
+
             // Fallback: spróbuj użyć Buffer
             try {
-              const buffer = Buffer.from(base64Data, 'base64');
-              const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
-              
+              const buffer = Buffer.from(base64Data, "base64");
+              const arrayBuffer = buffer.buffer.slice(
+                buffer.byteOffset,
+                buffer.byteOffset + buffer.byteLength
+              );
+
               console.log(
                 "✅ Obraz przekonwertowany (fallback), rozmiar:",
                 arrayBuffer.byteLength,
@@ -268,6 +271,7 @@ class AnimalAPI {
   /**
    * Sprawdza połączenie z serwerem
    */
+  // eslint-disable-next-line class-methods-use-this
   async checkConnection(): Promise<boolean> {
     try {
       const response = await fetch(API_ENDPOINTS.IDENTIFY_ANIMAL, {

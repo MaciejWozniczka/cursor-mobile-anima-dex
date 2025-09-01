@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 import {
   COLORS,
@@ -13,17 +12,14 @@ import { StoredBadge } from "@/types";
 import { formatDate } from "@/utils/helpers";
 import BadgeImage from "./BadgeImage";
 
+// eslint-disable-next-line react/require-default-props
 interface BadgeCardProps {
   badge: StoredBadge;
   onPress: (badge: StoredBadge) => void;
   size?: "small" | "medium" | "large";
 }
 
-const BadgeCard: React.FC<BadgeCardProps> = ({
-  badge,
-  onPress,
-  size = "medium",
-}) => {
+const BadgeCard = ({ badge, onPress, size = "medium" }: BadgeCardProps) => {
   const getSizeStyles = () => {
     switch (size) {
       case "small":
@@ -56,7 +52,10 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
-        <BadgeImage badge={badge} style={[styles.image, sizeStyles.image]} />
+        <BadgeImage
+          badge={badge}
+          style={[styles.image, sizeStyles.image] as any}
+        />
       </View>
 
       <View style={styles.content}>
@@ -108,5 +107,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+BadgeCard.defaultProps = {
+  size: "medium",
+};
 
 export default BadgeCard;

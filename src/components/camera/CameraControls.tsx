@@ -1,10 +1,10 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Camera } from "expo-camera";
 
-import { COLORS, SPACING, BORDER_RADIUS } from "@/utils/constants";
+import { COLORS, SPACING } from "@/utils/constants";
 
+// eslint-disable-next-line react/require-default-props
 interface CameraControlsProps {
   cameraType: "front" | "back";
   flashMode: "off" | "on" | "auto";
@@ -14,14 +14,14 @@ interface CameraControlsProps {
   isCapturing?: boolean;
 }
 
-const CameraControls: React.FC<CameraControlsProps> = ({
+const CameraControls = ({
   cameraType,
   flashMode,
   onCameraTypeChange,
   onFlashModeChange,
   onCapture,
   isCapturing = false,
-}) => {
+}: CameraControlsProps) => {
   const toggleFlashMode = () => {
     switch (flashMode) {
       case "off":
@@ -133,5 +133,9 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
 });
+
+CameraControls.defaultProps = {
+  isCapturing: false,
+};
 
 export default CameraControls;
