@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -24,7 +23,7 @@ import {
 import { StoredBadge } from "@/types";
 import BadgeService from "@/services/badges";
 import LoadingScreen from "@/components/common/LoadingScreen";
-import BadgeImage from "@/components/badges/BadgeImage";
+import BadgeGrid from "@/components/badges/BadgeGrid";
 import StorageService from "@/services/storage";
 
 type GalleryScreenNavigationProp = StackNavigationProp<
@@ -110,26 +109,23 @@ const GalleryScreen: React.FC = () => {
     navigation.navigate("BadgeDetail", { badge });
   };
 
-  const renderBadgeItem = ({ item }: { item: StoredBadge }) => (
-    <TouchableOpacity
-      style={styles.badgeItem}
-      onPress={() => handleBadgePress(item)}
-      activeOpacity={0.8}
-    >
-      <BadgeImage badge={item} style={styles.badgeImage} />
-    </TouchableOpacity>
-  );
-
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIconContainer}>
-        <Ionicons name="images-outline" size={80} color={COLORS.textSecondary} />
+        <Ionicons
+          name="images-outline"
+          size={80}
+          color={COLORS.textSecondary}
+        />
       </View>
       <Text style={styles.emptyTitle}>Brak odznak</Text>
       <Text style={styles.emptyMessage}>
         Zrób zdjęcie zwierzęcia, aby rozpocząć kolekcję!
       </Text>
-             <TouchableOpacity style={styles.cameraButton} onPress={() => navigation.navigate("Main")}>
+      <TouchableOpacity
+        style={styles.cameraButton}
+        onPress={() => navigation.navigate("Main")}
+      >
         <Ionicons name="camera" size={24} color={COLORS.white} />
         <Text style={styles.cameraButtonText}>Zrób zdjęcie</Text>
       </TouchableOpacity>
@@ -142,33 +138,19 @@ const GalleryScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        testID="badge-list"
-        data={badges}
-        renderItem={renderBadgeItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyState}
-        numColumns={3}
-        columnWrapperStyle={styles.badgeRow}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            colors={[COLORS.primary]}
-            tintColor={COLORS.primary}
-          />
-        }
-        getItemLayout={(data, index) => ({
-          length: 120, // Wysokość elementu
-          offset: 120 * Math.floor(index / 3),
-          index,
-        })}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={12}
-        windowSize={10}
-        initialNumToRender={9}
+      {/* Header z tytułem */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Odznaki</Text>
+      </View>
+
+      {/* Grid odznak */}
+      <BadgeGrid
+        badges={badges}
+        onBadgePress={handleBadgePress}
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
+        numColumns={2}
+        size="medium"
       />
     </SafeAreaView>
   );
@@ -179,33 +161,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  listContainer: {
-    padding: SPACING.md,
-    paddingBottom: SPACING.xl,
-  },
-  badgeRow: {
-    justifyContent: "space-between",
-    marginBottom: SPACING.md,
-  },
-  badgeItem: {
-    flex: 1,
+  header: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
     backgroundColor: COLORS.white,
-    borderRadius: BORDER_RADIUS.xl,
-    padding: SPACING.sm,
-    marginHorizontal: SPACING.xs,
     alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.medium,
-    aspectRatio: 1,
-    minHeight: 100,
-    maxHeight: 120,
   },
-  badgeImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: BORDER_RADIUS.lg,
+  headerTitle: {
+    fontSize: FONTS.sizes.xxl,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.textPrimary,
+    textAlign: "center",
   },
   emptyState: {
     flex: 1,

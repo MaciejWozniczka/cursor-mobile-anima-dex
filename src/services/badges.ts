@@ -370,6 +370,166 @@ class BadgeService {
       throw error;
     }
   }
+
+  /**
+   * Generuje przykładowe odznaki z różnymi stylami (dla demonstracji)
+   */
+  async generateSampleBadges(): Promise<StoredBadge[]> {
+    try {
+      const sampleBadges = [
+        {
+          animalName: "Sad Święt...",
+          description: "Tradycyjny sad z owocami",
+          badgeType: "standard" as const,
+          category: "Sad Święt...",
+          discoveredAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 dzień temu
+        },
+        {
+          animalName: "Senny Mi...",
+          description: "Senne popołudnie",
+          badgeType: "standard" as const,
+          category: "Senny Mi...",
+          discoveredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 dni temu
+        },
+        {
+          animalName: "Piwnica a...",
+          description: "Winiarnia i piwnica",
+          badgeType: "standard" as const,
+          category: "Piwnica a...",
+          discoveredAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // 8 dni temu
+        },
+        {
+          animalName: "Odysseja ...",
+          description: "Podróż przez Azję",
+          badgeType: "odyssey" as const,
+          category: "Odysseja ...",
+          discoveredAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), // 12 dni temu
+        },
+        {
+          animalName: "Odysseja ...",
+          description: "Świątynia Nieba",
+          badgeType: "odyssey" as const,
+          category: "Odysseja ...",
+          discoveredAt: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(), // 17 dni temu
+        },
+        {
+          animalName: "Odysseja ...",
+          description: "Pagoda w mieście",
+          badgeType: "odyssey" as const,
+          category: "Odysseja ...",
+          discoveredAt: new Date(Date.now() - 17 * 24 * 60 * 60 * 1000).toISOString(), // 17 dni temu
+        },
+        {
+          animalName: "Podróż p...",
+          description: "Big Ben w Londynie",
+          badgeType: "journey" as const,
+          category: "Podróż p...",
+          overlayText: "Big Ben",
+          specialIcon: "50",
+          discoveredAt: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(), // 24 dni temu
+        },
+        {
+          animalName: "Podróż p...",
+          description: "Chichen Itza",
+          badgeType: "journey" as const,
+          category: "Podróż p...",
+          overlayText: "Chichen Itza",
+          specialIcon: "50",
+          discoveredAt: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(), // 26 dni temu
+        },
+        {
+          animalName: "Podróż p...",
+          description: "Wieża Eiffla",
+          badgeType: "journey" as const,
+          category: "Podróż p...",
+          overlayText: "Eiffel Tower",
+          specialIcon: "50",
+          discoveredAt: new Date(Date.now() - 26 * 24 * 60 * 60 * 1000).toISOString(), // 26 dni temu
+        },
+        {
+          animalName: "Wyzwani...",
+          description: "Wyzwanie z psem",
+          badgeType: "challenge" as const,
+          category: "Wyzwani...",
+          discoveredAt: new Date(Date.now() - 33 * 24 * 60 * 60 * 1000).toISOString(), // 33 dni temu
+        },
+        {
+          animalName: "Wyzwani...",
+          description: "Lody z dziećmi",
+          badgeType: "challenge" as const,
+          category: "Wyzwani...",
+          discoveredAt: new Date(Date.now() - 34 * 24 * 60 * 60 * 1000).toISOString(), // 34 dni temu
+        },
+        {
+          animalName: "Gałka rad...",
+          description: "Lody z dodatkami",
+          badgeType: "scoop" as const,
+          category: "Gałka rad...",
+          discoveredAt: new Date(Date.now() - 37 * 24 * 60 * 60 * 1000).toISOString(), // 37 dni temu
+        },
+        {
+          animalName: "Gałka rad...",
+          description: "Lody na ulicy",
+          badgeType: "scoop" as const,
+          category: "Gałka rad...",
+          discoveredAt: new Date(Date.now() - 43 * 24 * 60 * 60 * 1000).toISOString(), // 43 dni temu
+        },
+        {
+          animalName: "Festiwal ...",
+          description: "Fajerwerki nad wodą",
+          badgeType: "festival" as const,
+          category: "Festiwal ...",
+          discoveredAt: new Date(Date.now() - 46 * 24 * 60 * 60 * 1000).toISOString(), // 46 dni temu
+        },
+        {
+          animalName: "Festiwal ...",
+          description: "Fajerwerki nad Fuji",
+          badgeType: "festival" as const,
+          category: "Festiwal ...",
+          discoveredAt: new Date(Date.now() - 52 * 24 * 60 * 60 * 1000).toISOString(), // 52 dni temu
+        },
+      ];
+
+      const createdBadges: StoredBadge[] = [];
+      
+      for (const sampleBadge of sampleBadges) {
+        try {
+          const mockImageBuffer = new ArrayBuffer(1024); // Mock data
+          const badge = await StorageService.saveBadge(
+            sampleBadge.animalName,
+            sampleBadge.description,
+            mockImageBuffer,
+            undefined,
+            {
+              badgeType: sampleBadge.badgeType,
+              category: sampleBadge.category,
+              overlayText: sampleBadge.overlayText,
+              specialIcon: sampleBadge.specialIcon,
+            }
+          );
+          
+          // Aktualizuj badge o dodatkowe pola
+          const updatedBadge = {
+            ...badge,
+            badgeType: sampleBadge.badgeType,
+            category: sampleBadge.category,
+            overlayText: sampleBadge.overlayText,
+            specialIcon: sampleBadge.specialIcon,
+          };
+          
+          createdBadges.push(updatedBadge);
+        } catch (error) {
+          console.error(`❌ Error creating sample badge ${sampleBadge.animalName}:`, error);
+        }
+      }
+
+      console.log("🎭 Wygenerowano przykładowe odznaki:", createdBadges.length);
+      return createdBadges;
+    } catch (error) {
+      console.error("❌ Error generating sample badges:", error);
+      return [];
+    }
+  }
 }
 
 export default BadgeService.getInstance();

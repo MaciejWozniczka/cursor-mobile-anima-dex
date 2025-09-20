@@ -4,11 +4,11 @@
     "slug": "animal-dex",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.svg",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-          "splash": {
-        "backgroundColor": "#4CAF50"
-      },
+    "splash": {
+      "backgroundColor": "#4CAF50"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -24,11 +24,13 @@
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
-      "favicon": "./assets/icon.svg"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       [
@@ -40,8 +42,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "0c131c8c-60c8-4ef5-b96d-f6b5a44d5e65"
       }
-    }
+    },
+    "owner": "maciejwozniczka"
   }
 }

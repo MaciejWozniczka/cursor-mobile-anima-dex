@@ -61,6 +61,20 @@ export const COLORS = {
   // Border Colors
   border: "#E5E7EB", // Light gray
   borderLight: "#F3F4F6", // Very light gray
+  
+  // Badge Type Colors
+  badgeStandard: "#E5E7EB", // Standard border
+  badgeOdyssey: "#F59E0B", // Gold border for Odyssey
+  badgeJourney: "#F59E0B", // Gold border for Journey
+  badgeChallenge: "#60A5FA", // Light blue border for Challenge
+  badgeScoop: "#60A5FA", // Light blue border for Scoop
+  badgeFestival: "#60A5FA", // Light blue border for Festival
+  
+  // Badge Tier Colors
+  badgeBronze: "#CD7F32",
+  badgeSilver: "#C0C0C0",
+  badgeGold: "#FFD700",
+  badgePlatinum: "#E5E4E2",
 } as const;
 
 // Typography

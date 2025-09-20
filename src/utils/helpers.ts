@@ -17,11 +17,16 @@ if (typeof global.btoa === "undefined") {
 // Date formatting
 export const formatDate = (date: string | Date): string => {
   const d = new Date(date);
-  return d.toLocaleDateString("pl-PL", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const day = d.getDate();
+  const month = d.getMonth();
+  
+  // Skróty miesięcy po polsku
+  const monthNames = [
+    'sty', 'lut', 'mar', 'kwi', 'maj', 'cze',
+    'lip', 'sie', 'wrz', 'paź', 'lis', 'gru'
+  ];
+  
+  return `${day} ${monthNames[month]}`;
 };
 
 export const formatDateTime = (date: string | Date): string => {

@@ -21,6 +21,62 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
+  // Funkcja pomocnicza do generowania stylów placeholdera
+  const getPlaceholderStyle = () => {
+    const badgeType = badge.badgeType || 'standard';
+    
+    switch (badgeType) {
+      case 'odyssey':
+      case 'journey':
+        return {
+          backgroundColor: '#FFF3CD', // Jasny żółty
+          iconColor: '#856404',
+          icon: 'airplane',
+        };
+      case 'challenge':
+      case 'scoop':
+      case 'festival':
+        return {
+          backgroundColor: '#D1ECF1', // Jasny niebieski
+          iconColor: '#0C5460',
+          icon: 'star',
+        };
+      default:
+        return {
+          backgroundColor: '#F8F9FA', // Jasny szary
+          iconColor: '#6C757D',
+          icon: 'leaf',
+        };
+    }
+  };
+
+  // Funkcja pomocnicza do renderowania placeholdera
+  const renderPlaceholder = () => {
+    const placeholder = getPlaceholderStyle();
+    
+    return (
+      <View
+        style={[
+          style,
+          {
+            backgroundColor: placeholder.backgroundColor,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+          },
+        ]}
+      >
+        <Ionicons 
+          name={placeholder.icon as any} 
+          size={Math.min(24, (style?.width as number || 100) * 0.3)} 
+          color={placeholder.iconColor} 
+        />
+      </View>
+    );
+  };
+
   useEffect(() => {
     loadImage();
   }, [badge]);
@@ -61,40 +117,12 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
   };
 
   if (isLoading) {
-    return (
-      <View
-        style={[
-          style,
-          {
-            backgroundColor: COLORS.grayLight,
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 8,
-          },
-        ]}
-      >
-        <Ionicons name="image-outline" size={24} color={COLORS.gray} />
-      </View>
-    );
+    return renderPlaceholder();
   }
 
   if (hasError || !imageUri) {
     if (showFallback) {
-      return (
-        <View
-          style={[
-            style,
-            {
-              backgroundColor: COLORS.grayLight,
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 8,
-            },
-          ]}
-        >
-          <Ionicons name="image-outline" size={24} color={COLORS.gray} />
-        </View>
-      );
+      return renderPlaceholder();
     }
     return null;
   }
