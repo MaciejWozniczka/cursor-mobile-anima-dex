@@ -48,10 +48,16 @@ export interface StoredBadge {
   discoveredAt: string; // ISO timestamp
   originalPhoto?: string; // base64 zdjęcia użytkownika (opcjonalnie)
   additionalData?: any; // dodatkowe dane z API generowania odznaki
-  
+
   // Nowe pola dla stylizacji odznak
-  badgeType?: 'standard' | 'odyssey' | 'journey' | 'challenge' | 'scoop' | 'festival';
-  badgeTier?: 'bronze' | 'silver' | 'gold' | 'platinum';
+  badgeType?:
+    | "standard"
+    | "odyssey"
+    | "journey"
+    | "challenge"
+    | "scoop"
+    | "festival";
+  badgeTier?: "bronze" | "silver" | "gold" | "platinum";
   category?: string; // np. "Podróż", "Wyzwanie", "Festiwal"
   overlayText?: string; // tekst na banerze (np. "Big Ben", "Chichen Itza")
   specialIcon?: string; // specjalna ikona (np. "50", "diamond")
@@ -113,6 +119,30 @@ export interface AnalysisState {
   error: string | null;
   photoUri: string | null;
 }
+
+// Discovery Result Types
+export interface DiscoveryResult {
+  success: true;
+  badge: StoredBadge;
+}
+
+export interface DiscoveryResultAlreadyExists {
+  success: false;
+  alreadyExists: true;
+  animalName: string;
+  existingBadge: StoredBadge;
+}
+
+export interface DiscoveryResultError {
+  success: false;
+  alreadyExists: false;
+  error: string;
+}
+
+export type DiscoveryResultType =
+  | DiscoveryResult
+  | DiscoveryResultAlreadyExists
+  | DiscoveryResultError;
 
 // Gallery Types
 export interface GalleryFilters {

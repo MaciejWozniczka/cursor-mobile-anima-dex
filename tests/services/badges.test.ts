@@ -12,10 +12,12 @@ jest.mock("../../src/services/api", () => ({
 // Mock dla StorageService
 jest.mock("../../src/services/storage", () => ({
   checkIfAnimalExists: jest.fn(),
+  getBadgeByAnimalName: jest.fn(),
   saveBadge: jest.fn(),
   getBadges: jest.fn(),
   getBadgeById: jest.fn(),
   deleteBadge: jest.fn(),
+  clearAllBadges: jest.fn(),
 }));
 
 const mockBadge: StoredBadge = {
@@ -64,7 +66,10 @@ describe("BadgeService", () => {
 
       const result = await BadgeService.discoverAnimal("file://test.jpg");
 
-      expect(result).toEqual(mockBadge);
+      expect(result).toEqual({
+        success: true,
+        badge: mockBadge,
+      });
       expect(AnimalAPI.identifyAnimal).toHaveBeenCalledWith("file://test.jpg");
       expect(StorageService.checkIfAnimalExists).toHaveBeenCalledWith("Lew");
       expect(AnimalAPI.generateBadge).toHaveBeenCalledWith("Lew");
@@ -77,20 +82,36 @@ describe("BadgeService", () => {
       );
     });
 
-    it("should throw error when animal already exists", async () => {
+    it("should return already exists result when animal already exists", async () => {
       const mockIdentification = {
         name: "Tygrys",
         description: "Największy kot świata",
+      };
+
+      const existingBadge: StoredBadge = {
+        id: "2",
+        animalName: "Tygrys",
+        description: "Największy kot świata",
+        imageBlob: "data:image/jpeg;base64,existing...",
+        discoveredAt: "2024-01-01",
       };
 
       (AnimalAPI.identifyAnimal as jest.Mock).mockResolvedValue(
         mockIdentification
       );
       (StorageService.checkIfAnimalExists as jest.Mock).mockResolvedValue(true);
+      (StorageService.getBadgeByAnimalName as jest.Mock).mockResolvedValue(
+        existingBadge
+      );
 
-      await expect(
-        BadgeService.discoverAnimal("file://test.jpg")
-      ).rejects.toThrow('Zwierzę "Tygrys" zostało już odkryte!');
+      const result = await BadgeService.discoverAnimal("file://test.jpg");
+
+      expect(result).toEqual({
+        success: false,
+        alreadyExists: true,
+        animalName: "Tygrys",
+        existingBadge: existingBadge,
+      });
     });
 
     it("should handle identification errors", async () => {
@@ -98,9 +119,13 @@ describe("BadgeService", () => {
         new Error("Identification failed")
       );
 
-      await expect(
-        BadgeService.discoverAnimal("file://test.jpg")
-      ).rejects.toThrow("Identification failed");
+      const result = await BadgeService.discoverAnimal("file://test.jpg");
+
+      expect(result).toEqual({
+        success: false,
+        alreadyExists: false,
+        error: "Identification failed",
+      });
     });
 
     it("should handle badge generation errors", async () => {
@@ -119,9 +144,13 @@ describe("BadgeService", () => {
         new Error("Badge generation failed")
       );
 
-      await expect(
-        BadgeService.discoverAnimal("file://test.jpg")
-      ).rejects.toThrow("Badge generation failed");
+      const result = await BadgeService.discoverAnimal("file://test.jpg");
+
+      expect(result).toEqual({
+        success: false,
+        alreadyExists: false,
+        error: "Badge generation failed",
+      });
     });
 
     it("should handle storage errors", async () => {
@@ -147,9 +176,13 @@ describe("BadgeService", () => {
         new Error("Storage failed")
       );
 
-      await expect(
-        BadgeService.discoverAnimal("file://test.jpg")
-      ).rejects.toThrow("Storage failed");
+      const result = await BadgeService.discoverAnimal("file://test.jpg");
+
+      expect(result).toEqual({
+        success: false,
+        alreadyExists: false,
+        error: "Storage failed",
+      });
     });
   });
 
@@ -261,8 +294,7 @@ describe("BadgeService", () => {
 
   describe("clearAllBadges", () => {
     it("should clear all badges successfully", async () => {
-      (StorageService.getBadges as jest.Mock).mockResolvedValue([mockBadge]);
-      (StorageService.deleteBadge as jest.Mock).mockResolvedValue(true);
+      (StorageService.clearAllBadges as jest.Mock).mockResolvedValue(true);
 
       const result = await BadgeService.clearAllBadges();
 
@@ -270,7 +302,7 @@ describe("BadgeService", () => {
     });
 
     it("should handle clear errors", async () => {
-      (StorageService.getBadges as jest.Mock).mockRejectedValue(
+      (StorageService.clearAllBadges as jest.Mock).mockRejectedValue(
         new Error("Clear failed")
       );
 

@@ -36,6 +36,8 @@ const CameraScreen: React.FC = () => {
   const [flashMode, setFlashMode] = useState<"off" | "on" | "auto">("off");
   const [isCapturing, setIsCapturing] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   useEffect(() => {
     initializeCamera();
@@ -46,6 +48,7 @@ const CameraScreen: React.FC = () => {
     React.useCallback(() => {
       console.log("🔄 Camera screen focused - reinicializing camera");
       setIsCameraReady(false);
+      setRetryCount(0); // Reset licznika przy focus
 
       // Sprawdź czy trzeba zresetować kamerę
       const shouldReset = route.params?.resetCamera;
@@ -64,21 +67,26 @@ const CameraScreen: React.FC = () => {
         clearTimeout(timer);
         console.log("🔄 Camera screen unfocused");
         setIsCameraReady(false);
+        setIsInitializing(false);
+        // Wyczyść referencję gdy ekran traci focus
+        if (cameraRef.current) {
+          cameraRef.current = null;
+        }
       };
     }, [route.params?.resetCamera])
   );
 
-  // Automatyczne resetowanie kamery po 10 sekundach jeśli nie jest gotowa
+  // Automatyczne resetowanie kamery po 15 sekundach jeśli nie jest gotowa
   useEffect(() => {
-    if (hasPermission && !isCameraReady) {
+    if (hasPermission && !isCameraReady && !isInitializing) {
       const resetTimer = setTimeout(() => {
-        console.log("⏰ Camera not ready after 10s, auto-resetting...");
+        console.log("⏰ Camera not ready after 15s, auto-resetting...");
         forceReinitialize();
-      }, 10000);
+      }, 15000);
 
       return () => clearTimeout(resetTimer);
     }
-  }, [hasPermission, isCameraReady]);
+  }, [hasPermission, isCameraReady, isInitializing]);
 
   // Cleanup przy unmount
   useEffect(() => {
@@ -92,26 +100,38 @@ const CameraScreen: React.FC = () => {
   }, []);
 
   const initializeCamera = async () => {
+    // Zapobiegaj wielokrotnej inicjalizacji
+    if (isInitializing) {
+      console.log("⚠️ Camera already initializing, skipping...");
+      return;
+    }
+
     try {
+      setIsInitializing(true);
       console.log("🔄 Initializing camera...");
       const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === "granted");
 
       if (status === "granted") {
         console.log("✅ Camera permissions granted");
-        // Krótkie opóźnienie aby kamera miała czas się zainicjalizować
+        // Uproszczone podejście - nie sprawdzaj referencji podczas inicjalizacji
+        // Pozwól onCameraReady obsłużyć ustawienie gotowości
         setTimeout(() => {
-          setIsCameraReady(true);
-          console.log("✅ Camera ready");
+          setIsInitializing(false);
+          console.log(
+            "🔄 Camera initialization completed, waiting for onCameraReady..."
+          );
         }, 500);
       } else {
         console.log("❌ Camera permissions denied");
         setIsCameraReady(false);
+        setIsInitializing(false);
       }
     } catch (error) {
       console.error("❌ Error requesting camera permission:", error);
       setHasPermission(false);
       setIsCameraReady(false);
+      setIsInitializing(false);
     }
   };
 
@@ -120,12 +140,14 @@ const CameraScreen: React.FC = () => {
     console.log("🔍 Camera status check:", {
       hasPermission,
       isCameraReady,
-      cameraRef: !!cameraRef.current,
+      isInitializing,
+      retryCount,
     });
   };
 
   const handleCapture = async () => {
-    if (!cameraRef.current || isCapturing || !isCameraReady) {
+    // Uproszczone sprawdzenie - tylko podstawowe warunki
+    if (!isCameraReady || isCapturing || !hasPermission) {
       console.log("❌ Cannot capture: camera not ready or already capturing");
       checkCameraStatus();
       return;
@@ -185,16 +207,20 @@ const CameraScreen: React.FC = () => {
   const forceReinitialize = () => {
     console.log("🔄 Force reinitializing camera...");
     setIsCameraReady(false);
+    setIsCapturing(false);
+    setIsInitializing(false);
+    setRetryCount(0); // Reset licznika przy ręcznym resetowaniu
 
     // Wyczyść referencję do kamery
     if (cameraRef.current) {
       cameraRef.current = null;
     }
 
-    // Dłuższe opóźnienie dla wymuszonej reinicjalizacji
+    // Krótkie opóźnienie dla wymuszonej reinicjalizacji
     setTimeout(() => {
+      console.log("🔄 Starting camera reinitialization...");
       initializeCamera();
-    }, 500);
+    }, 200);
   };
 
   const getFlashIcon = () => {
@@ -249,7 +275,26 @@ const CameraScreen: React.FC = () => {
       <View style={styles.cameraContainer}>
         {!isCameraReady && hasPermission && (
           <View style={styles.cameraLoading}>
-            <Text style={styles.loadingText}>Inicjalizacja aparatu...</Text>
+            <Text style={styles.loadingText}>
+              {isInitializing
+                ? "Inicjalizacja aparatu..."
+                : retryCount >= 3
+                  ? "Aparat nie odpowiada. Spróbuj ponownie."
+                  : "Aparat nie jest gotowy"}
+            </Text>
+            {retryCount > 0 && (
+              <Text style={styles.retryCountText}>Próba {retryCount}/3</Text>
+            )}
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={forceReinitialize}
+              disabled={isInitializing}
+            >
+              <Ionicons name="refresh" size={20} color={COLORS.white} />
+              <Text style={styles.retryButtonText}>
+                {isInitializing ? "Inicjalizacja..." : "Spróbuj ponownie"}
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -261,6 +306,8 @@ const CameraScreen: React.FC = () => {
           onCameraReady={() => {
             console.log("📷 Camera component ready");
             setIsCameraReady(true);
+            setRetryCount(0); // Reset licznika przy udanej inicjalizacji
+            console.log("✅ Camera state updated to ready");
           }}
           onMountError={(error) => {
             console.error("❌ Camera mount error:", error);
@@ -288,7 +335,7 @@ const CameraScreen: React.FC = () => {
 
             {!isCameraReady && (
               <TouchableOpacity
-                style={styles.controlButton}
+                style={[styles.controlButton, styles.resetButton]}
                 onPress={forceReinitialize}
               >
                 <Ionicons name="refresh" size={24} color={COLORS.white} />
@@ -444,6 +491,32 @@ const styles = StyleSheet.create({
   },
   cameraHidden: {
     opacity: 0,
+  },
+  resetButton: {
+    backgroundColor: COLORS.error,
+    borderColor: COLORS.error,
+  },
+  retryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+    marginTop: SPACING.lg,
+    ...SHADOWS.glass,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontSize: FONTS.sizes.md,
+    fontWeight: FONTS.weights.medium,
+    marginLeft: SPACING.sm,
+  },
+  retryCountText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: FONTS.weights.medium,
+    marginTop: SPACING.sm,
   },
 });
 

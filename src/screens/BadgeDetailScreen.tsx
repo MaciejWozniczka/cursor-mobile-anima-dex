@@ -104,14 +104,6 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({
               </Text>
             </View>
           </View>
-
-          <View style={styles.detailItem}>
-            <Ionicons name="time" size={20} color={COLORS.textSecondary} />
-            <View style={styles.detailContent}>
-              <Text style={styles.detailLabel}>ID odznaki</Text>
-              <Text style={styles.detailValue}>{badge.id}</Text>
-            </View>
-          </View>
         </View>
 
         {/* Oryginalne zdjęcie (jeśli dostępne) */}
@@ -122,6 +114,15 @@ const BadgeDetailScreen: React.FC<BadgeDetailScreenProps> = ({
               source={{ uri: badge.originalPhoto }}
               style={styles.originalPhoto}
               resizeMode="cover"
+              onError={(error) => {
+                console.warn(
+                  "⚠️ Błąd ładowania oryginalnego zdjęcia:",
+                  error.nativeEvent.error
+                );
+              }}
+              onLoad={() => {
+                console.log("✅ Oryginalne zdjęcie załadowane pomyślnie");
+              }}
             />
           </View>
         )}
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
   badgeImage: {
     width: 220,
     height: 220,
-    borderRadius: BORDER_RADIUS.xl,
+    borderRadius: 110, // Okrągły kształt (połowa szerokości/wysokości)
     ...SHADOWS.glass,
   },
   infoContainer: {

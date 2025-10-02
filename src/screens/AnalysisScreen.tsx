@@ -21,7 +21,13 @@ import {
   BORDER_RADIUS,
   SHADOWS,
 } from "@/utils/constants";
-import { StoredBadge } from "@/types";
+import {
+  StoredBadge,
+  DiscoveryResultType,
+  DiscoveryResult,
+  DiscoveryResultAlreadyExists,
+  DiscoveryResultError,
+} from "@/types";
 import BadgeService from "@/services/badges";
 import BadgeUnlockAnimation from "@/components/badges/BadgeUnlockAnimation";
 import BadgeImage from "@/components/badges/BadgeImage";
@@ -49,6 +55,8 @@ const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
   const [result, setResult] = useState<StoredBadge | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
+  const [alreadyExists, setAlreadyExists] =
+    useState<DiscoveryResultAlreadyExists | null>(null);
 
   useEffect(() => {
     analyzePhoto();
@@ -58,15 +66,26 @@ const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
     try {
       setIsAnalyzing(true);
       setError(null);
+      setAlreadyExists(null);
 
-      const badge = await BadgeService.discoverAnimal(photoUri);
-      setResult(badge);
+      const discoveryResult = await BadgeService.discoverAnimal(photoUri);
 
-      // Pokaż animację po udanej analizie
-      setShowAnimation(true);
+      if (discoveryResult.success) {
+        // Nowe odkrycie - pokaż animację
+        setResult(discoveryResult.badge);
+        setShowAnimation(true);
+      } else if (discoveryResult.alreadyExists) {
+        // Zwierzę już odkryte - pokaż przyjazny komunikat
+        setAlreadyExists(discoveryResult);
+      } else {
+        // Prawdziwy błąd - wyświetl przyjazny komunikat
+        setError(
+          "Coś poszło nie tak podczas analizy zdjęcia. Spróbuj ponownie."
+        );
+      }
     } catch (error) {
-      console.error("Error analyzing photo:", error);
-      setError(error instanceof Error ? error.message : "Nieznany błąd");
+      // Wyświetl przyjazny komunikat zamiast technicznych szczegółów
+      setError("Coś poszło nie tak podczas analizy zdjęcia. Spróbuj ponownie.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -74,6 +93,7 @@ const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
 
   const handleRetry = () => {
     setError(null);
+    setAlreadyExists(null);
     analyzePhoto();
   };
 
@@ -108,6 +128,70 @@ const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
         visible={showAnimation}
         onAnimationComplete={handleAnimationComplete}
       />
+    );
+  }
+
+  // Jeśli zwierzę już zostało odkryte, pokaż przyjazny komunikat
+  if (!isAnalyzing && !error && !result && alreadyExists) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.analysisContainer}>
+          {/* Zdjęcie w pionie */}
+          <View style={styles.photoContainer}>
+            <Image source={{ uri: photoUri }} style={styles.photoPreview} />
+          </View>
+
+          {/* Komunikat o już odkrytym zwierzęciu */}
+          <View style={styles.alreadyExistsOverlay}>
+            <View style={styles.alreadyExistsContent}>
+              <Ionicons
+                name="checkmark-circle"
+                size={60}
+                color={COLORS.warning}
+              />
+              <Text style={styles.alreadyExistsTitle}>
+                Już masz tę odznakę!
+              </Text>
+              <Text style={styles.alreadyExistsMessage}>
+                Zwierzę "{alreadyExists.animalName}" zostało już odkryte
+                wcześniej.
+              </Text>
+
+              {/* Pokaż istniejącą odznakę */}
+              <View style={styles.existingBadgeContainer}>
+                <BadgeImage
+                  badge={alreadyExists.existingBadge}
+                  style={styles.existingBadgeImage}
+                />
+                <Text style={styles.existingBadgeLabel}>Twoja odznaka</Text>
+              </View>
+
+              <View style={styles.alreadyExistsActions}>
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={() =>
+                    navigation.navigate("BadgeDetail", {
+                      badge: alreadyExists.existingBadge,
+                    })
+                  }
+                >
+                  <Ionicons name="eye" size={20} color={COLORS.white} />
+                  <Text style={styles.primaryButtonText}>Zobacz odznakę</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.secondaryButton}
+                  onPress={handleBackToCamera}
+                >
+                  <Text style={styles.secondaryButtonText}>
+                    Kontynuuj odkrywanie
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -385,7 +469,7 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     marginBottom: SPACING.lg,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 70, // Okrągły kształt (połowa szerokości/wysokości)
     ...SHADOWS.small,
   },
   badgeLabel: {
@@ -430,6 +514,66 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: FONTS.sizes.md,
     fontWeight: FONTS.weights.medium,
+  },
+  // Style dla widoku "już odkryte"
+  alreadyExistsOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: SPACING.lg,
+  },
+  alreadyExistsContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.xl,
+    alignItems: "center",
+    maxWidth: 350,
+    ...SHADOWS.large,
+  },
+  alreadyExistsTitle: {
+    fontSize: FONTS.sizes.xl,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.lg,
+    textAlign: "center",
+  },
+  alreadyExistsMessage: {
+    fontSize: FONTS.sizes.md,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginTop: SPACING.md,
+    lineHeight: 24,
+  },
+  existingBadgeContainer: {
+    alignItems: "center",
+    marginVertical: SPACING.lg,
+    padding: SPACING.md,
+    backgroundColor: COLORS.background,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  existingBadgeImage: {
+    width: 100,
+    height: 100,
+    borderRadius: BORDER_RADIUS.lg,
+    ...SHADOWS.small,
+  },
+  existingBadgeLabel: {
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.sm,
+    fontWeight: FONTS.weights.medium,
+  },
+  alreadyExistsActions: {
+    marginTop: SPACING.lg,
+    width: "100%",
+    gap: SPACING.md,
   },
 });
 

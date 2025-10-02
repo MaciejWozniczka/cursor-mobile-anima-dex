@@ -78,8 +78,6 @@ class AnimalAPI {
         description: animalData.description.trim(),
       };
     } catch (error) {
-      console.error("Error identifying animal:", error);
-
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           throw createError(
@@ -220,10 +218,6 @@ class AnimalAPI {
             }
           }
         } else {
-          console.error(
-            "❌ Nie znaleziono danych obrazu w odpowiedzi:",
-            responseData
-          );
           throw createError(
             "INVALID_RESPONSE",
             "Nieprawidłowa odpowiedź z serwera - brak danych obrazu"
@@ -243,8 +237,6 @@ class AnimalAPI {
         return { imageData: arrayBuffer };
       }
     } catch (error) {
-      console.error("Error generating badge:", error);
-
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           throw createError(

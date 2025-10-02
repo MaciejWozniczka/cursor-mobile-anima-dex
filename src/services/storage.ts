@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
+import { File, Directory, Paths } from "expo-file-system";
 import { STORAGE_KEYS, StoredBadge, BadgeCollection, User } from "@/types";
 import {
   generateId,
@@ -9,12 +10,12 @@ import {
 
 class StorageService {
   private static instance: StorageService;
-  private badgesDir: string;
-  private metadataFile: string;
+  private badgesDir: Directory;
+  private metadataFile: File;
 
   private constructor() {
-    this.badgesDir = `${FileSystem.documentDirectory}badges/`;
-    this.metadataFile = `${this.badgesDir}metadata.json`;
+    this.badgesDir = new Directory(Paths.document, "badges");
+    this.metadataFile = new File(this.badgesDir, "metadata.json");
   }
 
   public static getInstance(): StorageService {
@@ -27,15 +28,15 @@ class StorageService {
   // Inicjalizacja systemu plików
   private async initializeFileSystem(): Promise<void> {
     try {
-      const dirInfo = await FileSystem.getInfoAsync(this.badgesDir);
+      const dirInfo = await FileSystem.getInfoAsync(this.badgesDir.uri);
       if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(this.badgesDir, {
+        await FileSystem.makeDirectoryAsync(this.badgesDir.uri, {
           intermediates: true,
         });
         console.log("✅ Utworzono katalog badges");
       }
     } catch (error) {
-      console.error("❌ Error initializing file system:", error);
+      console.error("❌ Błąd inicjalizacji FileSystem:", error);
       throw new Error("Nie udało się zainicjalizować systemu plików");
     }
   }
@@ -60,7 +61,7 @@ class StorageService {
       // Zapisz obraz jako plik
       console.log("🔄 Zapisuję obraz jako plik...");
       const imageFileName = `badge_${badgeId}.png`;
-      const imageUri = `${this.badgesDir}${imageFileName}`;
+      const imageUri = `${this.badgesDir.uri}/${imageFileName}`;
 
       // Konwertuj ArrayBuffer na base64 i zapisz jako plik
       console.log("🔄 Konwertuję ArrayBuffer na base64...");
@@ -77,11 +78,12 @@ class StorageService {
         throw new Error("Nieprawidłowy format base64");
       }
 
-      // Zapisz jako plik binarny
+      // Zapisz jako plik binarny używając legacy API
       try {
         await FileSystem.writeAsStringAsync(imageUri, base64Image, {
           encoding: FileSystem.EncodingType.Base64,
         });
+        console.log("✅ Obraz zapisany jako plik:", imageUri);
       } catch (writeError) {
         console.error("❌ Błąd zapisywania pliku:", writeError);
 
@@ -95,14 +97,12 @@ class StorageService {
         }
       }
 
-      console.log("✅ Obraz zapisany jako plik:", imageUri);
-
       // Zapisz oryginalne zdjęcie (jeśli dostępne)
       let originalPhotoUri: string | undefined;
       if (originalPhoto) {
         try {
           const originalFileName = `original_${badgeId}.jpg`;
-          originalPhotoUri = `${this.badgesDir}${originalFileName}`;
+          originalPhotoUri = `${this.badgesDir.uri}/${originalFileName}`;
 
           // Sprawdź czy originalPhoto to już base64 czy URI
           if (
@@ -117,25 +117,44 @@ class StorageService {
           } else {
             // To jest base64, zapisz jako plik
             try {
+              // Sprawdź czy base64 ma prefix data:image
+              let base64Data = originalPhoto;
+              if (originalPhoto.startsWith("data:image")) {
+                // Usuń prefix data:image/jpeg;base64,
+                base64Data = originalPhoto.split(",")[1];
+              }
+
               await FileSystem.writeAsStringAsync(
                 originalPhotoUri,
-                originalPhoto,
+                base64Data,
                 {
                   encoding: FileSystem.EncodingType.Base64,
                 }
               );
+              console.log("✅ Oryginalne zdjęcie zapisane jako base64");
             } catch (writeError) {
               console.warn(
                 "⚠️ Błąd zapisywania oryginalnego zdjęcia jako base64:",
                 writeError
               );
               // Spróbuj zapisać jako zwykły tekst
-              await FileSystem.writeAsStringAsync(
-                originalPhotoUri,
-                originalPhoto
-              );
+              try {
+                await FileSystem.writeAsStringAsync(
+                  originalPhotoUri,
+                  originalPhoto
+                );
+                console.log(
+                  "✅ Oryginalne zdjęcie zapisane jako tekst (fallback)"
+                );
+              } catch (fallbackError) {
+                console.error(
+                  "❌ Błąd fallback zapisywania oryginalnego zdjęcia:",
+                  fallbackError
+                );
+              }
             }
           }
+          // originalPhotoUri już jest ustawiony powyżej
           console.log("✅ Oryginalne zdjęcie zapisane:", originalPhotoUri);
         } catch (photoError) {
           console.warn(
@@ -163,17 +182,6 @@ class StorageService {
 
       return badge;
     } catch (error) {
-      console.error("❌ Error saving badge:", error);
-
-      // Szczegółowe logowanie błędu
-      if (error instanceof Error) {
-        console.error("❌ Szczegóły błędu:", {
-          message: error.message,
-          stack: error.stack,
-          name: error.name,
-        });
-      }
-
       // Sprawdź czy to błąd base64
       if (error instanceof Error && error.message.includes("bad base-64")) {
         throw new Error("Błąd kodowania obrazu - nieprawidłowy format base64");
@@ -191,18 +199,18 @@ class StorageService {
 
       const metadataJson = JSON.stringify(updatedBadges, null, 2);
 
-      await FileSystem.writeAsStringAsync(this.metadataFile, metadataJson);
+      await FileSystem.writeAsStringAsync(this.metadataFile.uri, metadataJson);
       console.log("✅ Metadane zapisane do pliku JSON");
     } catch (error) {
-      console.error("❌ Error saving metadata:", error);
-
       // Fallback: spróbuj zapisać tylko nową odznakę
       try {
         const fallbackJson = JSON.stringify([newBadge], null, 2);
-        await FileSystem.writeAsStringAsync(this.metadataFile, fallbackJson);
+        await FileSystem.writeAsStringAsync(
+          this.metadataFile.uri,
+          fallbackJson
+        );
         console.log("✅ Metadane zapisane (fallback - tylko nowa odznaka)");
       } catch (fallbackError) {
-        console.error("❌ Error saving metadata fallback:", fallbackError);
         throw new Error("Nie udało się zapisać metadanych");
       }
     }
@@ -213,13 +221,13 @@ class StorageService {
     try {
       await this.initializeFileSystem();
 
-      const fileInfo = await FileSystem.getInfoAsync(this.metadataFile);
+      const fileInfo = await FileSystem.getInfoAsync(this.metadataFile.uri);
       if (!fileInfo.exists) {
         console.log("📁 Plik metadanych nie istnieje, zwracam pustą tablicę");
         return [];
       }
 
-      const data = await FileSystem.readAsStringAsync(this.metadataFile);
+      const data = await FileSystem.readAsStringAsync(this.metadataFile.uri);
       const badges = JSON.parse(data);
 
       if (!Array.isArray(badges)) {
@@ -230,7 +238,6 @@ class StorageService {
       console.log("✅ Załadowano odznaki z pliku:", badges.length);
       return badges;
     } catch (error) {
-      console.error("❌ Error getting badges:", error);
       return [];
     }
   }
@@ -241,7 +248,6 @@ class StorageService {
       const badges = await this.getBadges();
       return badges.find((badge) => badge.id === id) || null;
     } catch (error) {
-      console.error("❌ Error getting badge by ID:", error);
       return null;
     }
   }
@@ -255,8 +261,13 @@ class StorageService {
       if (badgeToDelete) {
         // Usuń plik obrazu
         try {
-          await FileSystem.deleteAsync(badgeToDelete.imageBlob);
-          console.log("✅ Usunięto plik obrazu:", badgeToDelete.imageBlob);
+          const fileInfo = await FileSystem.getInfoAsync(
+            badgeToDelete.imageBlob
+          );
+          if (fileInfo.exists) {
+            await FileSystem.deleteAsync(badgeToDelete.imageBlob);
+            console.log("✅ Usunięto plik obrazu:", badgeToDelete.imageBlob);
+          }
         } catch (fileError) {
           console.warn("⚠️ Nie udało się usunąć pliku obrazu:", fileError);
         }
@@ -264,11 +275,16 @@ class StorageService {
         // Usuń oryginalne zdjęcie (jeśli istnieje)
         if (badgeToDelete.originalPhoto) {
           try {
-            await FileSystem.deleteAsync(badgeToDelete.originalPhoto);
-            console.log(
-              "✅ Usunięto oryginalne zdjęcie:",
+            const fileInfo = await FileSystem.getInfoAsync(
               badgeToDelete.originalPhoto
             );
+            if (fileInfo.exists) {
+              await FileSystem.deleteAsync(badgeToDelete.originalPhoto);
+              console.log(
+                "✅ Usunięto oryginalne zdjęcie:",
+                badgeToDelete.originalPhoto
+              );
+            }
           } catch (fileError) {
             console.warn(
               "⚠️ Nie udało się usunąć oryginalnego zdjęcia:",
@@ -283,21 +299,16 @@ class StorageService {
       // Zapisz zaktualizowane metadane
       try {
         await FileSystem.writeAsStringAsync(
-          this.metadataFile,
+          this.metadataFile.uri,
           JSON.stringify(updatedBadges, null, 2)
         );
       } catch (writeError) {
-        console.error(
-          "❌ Błąd zapisywania metadanych po usunięciu:",
-          writeError
-        );
         throw new Error("Nie udało się zaktualizować metadanych");
       }
 
       console.log("✅ Odznaka usunięta pomyślnie");
       return true;
     } catch (error) {
-      console.error("❌ Error deleting badge:", error);
       return false;
     }
   }
@@ -310,8 +321,20 @@ class StorageService {
         (badge) => badge.animalName.toLowerCase() === animalName.toLowerCase()
       );
     } catch (error) {
-      console.error("❌ Error checking if animal exists:", error);
       return false;
+    }
+  }
+
+  // Pobierz odznakę po nazwie zwierzęcia
+  async getBadgeByAnimalName(animalName: string): Promise<StoredBadge | null> {
+    try {
+      const badges = await this.getBadges();
+      const badge = badges.find(
+        (badge) => badge.animalName.toLowerCase() === animalName.toLowerCase()
+      );
+      return badge || null;
+    } catch (error) {
+      return null;
     }
   }
 
@@ -340,13 +363,14 @@ class StorageService {
       await this.initializeFileSystem();
 
       // Usuń wszystkie pliki w katalogu badges
-      const files = await FileSystem.readDirectoryAsync(this.badgesDir);
+      const files = await FileSystem.readDirectoryAsync(this.badgesDir.uri);
       await Promise.allSettled(
-        files.map(async (file) => {
+        files.map(async (fileName) => {
           try {
-            await FileSystem.deleteAsync(`${this.badgesDir}${file}`);
+            const fileUri = `${this.badgesDir.uri}/${fileName}`;
+            await FileSystem.deleteAsync(fileUri);
           } catch (fileError) {
-            console.warn("⚠️ Nie udało się usunąć pliku:", file, fileError);
+            console.warn("⚠️ Nie udało się usunąć pliku:", fileName, fileError);
           }
         })
       );
@@ -354,7 +378,6 @@ class StorageService {
       console.log("✅ Wszystkie odznaki zostały usunięte");
       return true;
     } catch (error) {
-      console.error("❌ Error clearing badges:", error);
       return false;
     }
   }
@@ -373,7 +396,7 @@ class StorageService {
       // Zwróć ścieżkę do pliku
       return badge.imageBlob;
     } catch (error) {
-      console.error("❌ Error getting badge image URI:", error);
+      console.warn("⚠️ Błąd sprawdzania pliku obrazu:", error);
       return "";
     }
   }
@@ -392,19 +415,21 @@ class StorageService {
       const sizes = await Promise.allSettled(
         badges.map(async (badge) => {
           try {
-            const fileInfo = await FileSystem.getInfoAsync(badge.imageBlob);
             let size = 0;
-            if (fileInfo.exists) {
-              size += fileInfo.size || 0;
+
+            // Sprawdź rozmiar obrazu odznaki
+            const imageInfo = await FileSystem.getInfoAsync(badge.imageBlob);
+            if (imageInfo.exists) {
+              size += imageInfo.size || 0;
             }
 
             // Dodaj rozmiar oryginalnego zdjęcia
             if (badge.originalPhoto) {
-              const originalFileInfo = await FileSystem.getInfoAsync(
+              const originalInfo = await FileSystem.getInfoAsync(
                 badge.originalPhoto
               );
-              if (originalFileInfo.exists) {
-                size += originalFileInfo.size || 0;
+              if (originalInfo.exists) {
+                size += originalInfo.size || 0;
               }
             }
             return size;
@@ -428,7 +453,6 @@ class StorageService {
         lastSync: new Date().toISOString(),
       };
     } catch (error) {
-      console.error("❌ Error getting storage stats:", error);
       return {
         totalBadges: 0,
         totalSize: 0,
@@ -442,16 +466,15 @@ class StorageService {
     try {
       await this.initializeFileSystem();
 
-      const testFile = `${this.badgesDir}test.txt`;
+      const testUri = `${this.badgesDir.uri}/test.txt`;
       const testData = "test_data";
 
-      await FileSystem.writeAsStringAsync(testFile, testData);
-      const retrievedData = await FileSystem.readAsStringAsync(testFile);
-      await FileSystem.deleteAsync(testFile);
+      await FileSystem.writeAsStringAsync(testUri, testData);
+      const retrievedData = await FileSystem.readAsStringAsync(testUri);
+      await FileSystem.deleteAsync(testUri);
 
       return retrievedData === testData;
     } catch (error) {
-      console.error("❌ FileSystem test failed:", error);
       return false;
     }
   }
@@ -461,20 +484,19 @@ class StorageService {
     try {
       await this.initializeFileSystem();
 
-      const fileInfo = await FileSystem.getInfoAsync(this.metadataFile);
-      if (!fileInfo.exists) {
+      const metadataInfo = await FileSystem.getInfoAsync(this.metadataFile.uri);
+      if (!metadataInfo.exists) {
         return { repaired: false, message: "Brak danych do naprawy" };
       }
-
-      console.log("📊 Rozmiar pliku metadanych:", fileInfo.size, "bajtów");
+      console.log("📊 Rozmiar pliku metadanych:", metadataInfo.size, "bajtów");
 
       try {
-        const data = await FileSystem.readAsStringAsync(this.metadataFile);
+        const data = await FileSystem.readAsStringAsync(this.metadataFile.uri);
         const badges = JSON.parse(data);
 
         if (!Array.isArray(badges)) {
           console.warn("⚠️ Plik metadanych ma nieprawidłowy format, usuwam");
-          await FileSystem.deleteAsync(this.metadataFile);
+          await FileSystem.deleteAsync(this.metadataFile.uri);
           return {
             repaired: true,
             message: "Usunięto nieprawidłowy plik metadanych",
@@ -485,8 +507,8 @@ class StorageService {
         const badgeChecks = await Promise.allSettled(
           badges.map(async (badge) => {
             try {
-              const imageInfo = await FileSystem.getInfoAsync(badge.imageBlob);
-              if (imageInfo.exists) {
+              const fileInfo = await FileSystem.getInfoAsync(badge.imageBlob);
+              if (fileInfo.exists) {
                 return { valid: true, badge };
               } else {
                 console.warn("⚠️ Plik obrazu nie istnieje:", badge.imageBlob);
@@ -520,14 +542,10 @@ class StorageService {
           );
           try {
             await FileSystem.writeAsStringAsync(
-              this.metadataFile,
+              this.metadataFile.uri,
               JSON.stringify(validBadges, null, 2)
             );
           } catch (writeError) {
-            console.error(
-              "❌ Błąd zapisywania naprawionych metadanych:",
-              writeError
-            );
             throw new Error("Nie udało się zapisać naprawionych metadanych");
           }
           return {
@@ -539,14 +557,13 @@ class StorageService {
         return { repaired: false, message: "System plików jest poprawny" };
       } catch (parseError) {
         console.warn("⚠️ Błąd parsowania JSON, usuwam plik metadanych");
-        await FileSystem.deleteAsync(this.metadataFile);
+        await FileSystem.deleteAsync(this.metadataFile.uri);
         return {
           repaired: true,
           message: "Usunięto uszkodzony plik metadanych",
         };
       }
     } catch (error) {
-      console.error("❌ Error repairing file system:", error);
       return {
         repaired: false,
         message: "Błąd podczas naprawy systemu plików",
@@ -560,7 +577,6 @@ class StorageService {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
     } catch (error) {
-      console.error("❌ Error saving user:", error);
       throw new Error("Nie udało się zapisać danych użytkownika");
     }
   }
@@ -571,7 +587,6 @@ class StorageService {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.USER);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error("❌ Error getting user:", error);
       return null;
     }
   }
@@ -581,7 +596,7 @@ class StorageService {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.USER);
     } catch (error) {
-      console.error("❌ Error clearing user:", error);
+      // Ignoruj błędy przy czyszczeniu
     }
   }
 
@@ -591,7 +606,6 @@ class StorageService {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     } catch (error) {
-      console.error("❌ Error saving auth token:", error);
       throw new Error("Nie udało się zapisać tokenu autoryzacji");
     }
   }
@@ -601,7 +615,6 @@ class StorageService {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     } catch (error) {
-      console.error("❌ Error getting auth token:", error);
       return null;
     }
   }
@@ -611,7 +624,7 @@ class StorageService {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
     } catch (error) {
-      console.error("❌ Error clearing auth token:", error);
+      // Ignoruj błędy przy czyszczeniu
     }
   }
 
@@ -624,7 +637,6 @@ class StorageService {
         JSON.stringify(settings)
       );
     } catch (error) {
-      console.error("❌ Error saving settings:", error);
       throw new Error("Nie udało się zapisać ustawień");
     }
   }
@@ -635,7 +647,6 @@ class StorageService {
       const data = await AsyncStorage.getItem(STORAGE_KEYS.SETTINGS);
       return data ? JSON.parse(data) : {};
     } catch (error) {
-      console.error("❌ Error getting settings:", error);
       return {};
     }
   }
@@ -653,7 +664,6 @@ class StorageService {
       // Wyczyść system plików
       await this.clearAllBadges();
     } catch (error) {
-      console.error("❌ Error clearing all data:", error);
       throw new Error("Nie udało się wyczyścić wszystkich danych");
     }
   }

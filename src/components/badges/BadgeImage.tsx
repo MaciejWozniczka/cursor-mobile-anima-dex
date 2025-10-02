@@ -23,29 +23,29 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
 
   // Funkcja pomocnicza do generowania stylów placeholdera
   const getPlaceholderStyle = () => {
-    const badgeType = badge.badgeType || 'standard';
-    
+    const badgeType = badge.badgeType || "standard";
+
     switch (badgeType) {
-      case 'odyssey':
-      case 'journey':
+      case "odyssey":
+      case "journey":
         return {
-          backgroundColor: '#FFF3CD', // Jasny żółty
-          iconColor: '#856404',
-          icon: 'airplane',
+          backgroundColor: "#FFF3CD", // Jasny żółty
+          iconColor: "#856404",
+          icon: "airplane",
         };
-      case 'challenge':
-      case 'scoop':
-      case 'festival':
+      case "challenge":
+      case "scoop":
+      case "festival":
         return {
-          backgroundColor: '#D1ECF1', // Jasny niebieski
-          iconColor: '#0C5460',
-          icon: 'star',
+          backgroundColor: "#D1ECF1", // Jasny niebieski
+          iconColor: "#0C5460",
+          icon: "star",
         };
       default:
         return {
-          backgroundColor: '#F8F9FA', // Jasny szary
-          iconColor: '#6C757D',
-          icon: 'leaf',
+          backgroundColor: "#F8F9FA", // Jasny szary
+          iconColor: "#6C757D",
+          icon: "leaf",
         };
     }
   };
@@ -53,7 +53,7 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
   // Funkcja pomocnicza do renderowania placeholdera
   const renderPlaceholder = () => {
     const placeholder = getPlaceholderStyle();
-    
+
     return (
       <View
         style={[
@@ -62,16 +62,20 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
             backgroundColor: placeholder.backgroundColor,
             justifyContent: "center",
             alignItems: "center",
-            borderRadius: 8,
+            borderRadius:
+              Math.min(
+                (style?.width as number) || 100,
+                (style?.height as number) || 100
+              ) / 2, // Okrągły kształt
             borderWidth: 1,
             borderColor: COLORS.border,
           },
         ]}
       >
-        <Ionicons 
-          name={placeholder.icon as any} 
-          size={Math.min(24, (style?.width as number || 100) * 0.3)} 
-          color={placeholder.iconColor} 
+        <Ionicons
+          name={placeholder.icon as any}
+          size={Math.min(24, ((style?.width as number) || 100) * 0.3)}
+          color={placeholder.iconColor}
         />
       </View>
     );
@@ -109,7 +113,6 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
         }
       }
     } catch (error) {
-      console.error("❌ Error loading badge image:", error);
       setHasError(true);
     } finally {
       setIsLoading(false);
@@ -133,7 +136,6 @@ const BadgeImage: React.FC<BadgeImageProps> = ({
       style={style}
       resizeMode="contain"
       onError={() => {
-        console.error("❌ Image failed to load:", imageUri);
         setHasError(true);
       }}
       onLoad={() => {

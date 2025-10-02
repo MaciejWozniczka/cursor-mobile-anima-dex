@@ -10,7 +10,8 @@ export const getScreenDimensions = () => {
   }
 };
 
-export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = getScreenDimensions();
+export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
+  getScreenDimensions();
 
 // Colors - Clean Modern palette
 export const COLORS = {
@@ -61,7 +62,7 @@ export const COLORS = {
   // Border Colors
   border: "#E5E7EB", // Light gray
   borderLight: "#F3F4F6", // Very light gray
-  
+
   // Badge Type Colors
   badgeStandard: "#E5E7EB", // Standard border
   badgeOdyssey: "#F59E0B", // Gold border for Odyssey
@@ -69,7 +70,7 @@ export const COLORS = {
   badgeChallenge: "#60A5FA", // Light blue border for Challenge
   badgeScoop: "#60A5FA", // Light blue border for Scoop
   badgeFestival: "#60A5FA", // Light blue border for Festival
-  
+
   // Badge Tier Colors
   badgeBronze: "#CD7F32",
   badgeSilver: "#C0C0C0",
@@ -198,6 +199,6 @@ export const API_ENDPOINTS = {
     "https://andrzej210-20210.wykr.es/webhook/c30c62ee-7f2e-435c-972c-2873603e0226",
   GENERATE_BADGE:
     "https://andrzej210-20210.wykr.es/webhook/a56adba0-37af-40b9-941a-3db55e4fc028",
-  AUTH_LOGIN: "https://lifemanager.bieda.it/api/auth",
-  AUTH_REGISTER: "https://lifemanager.bieda.it/api/user",
+  AUTH_LOGIN: "https://jelitjournal.bieda.it/api/auth",
+  AUTH_REGISTER: "https://jelitjournal.bieda.it/api/user",
 } as const;

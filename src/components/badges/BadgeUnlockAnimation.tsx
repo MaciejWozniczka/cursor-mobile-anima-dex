@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   badgeImage: {
     width: 80,
     height: 80,
-    borderRadius: BORDER_RADIUS.lg,
+    borderRadius: 40, // Okrągły kształt (połowa szerokości/wysokości)
   },
   textContainer: {
     alignItems: "center",

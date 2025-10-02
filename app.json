@@ -9,9 +9,7 @@
     "splash": {
       "backgroundColor": "#4CAF50"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.animadex.app"

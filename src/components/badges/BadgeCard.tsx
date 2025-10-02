@@ -45,19 +45,19 @@ const BadgeCard = ({ badge, onPress, size = "medium" }: BadgeCardProps) => {
   };
 
   const getBadgeStyle = () => {
-    const badgeType = badge.badgeType || 'standard';
-    
+    const badgeType = badge.badgeType || "standard";
+
     switch (badgeType) {
-      case 'odyssey':
-      case 'journey':
+      case "odyssey":
+      case "journey":
         return {
           borderColor: COLORS.badgeOdyssey,
           borderWidth: 3,
           backgroundColor: COLORS.white,
         };
-      case 'challenge':
-      case 'scoop':
-      case 'festival':
+      case "challenge":
+      case "scoop":
+      case "festival":
         return {
           borderColor: COLORS.badgeChallenge,
           borderWidth: 3,
@@ -73,21 +73,21 @@ const BadgeCard = ({ badge, onPress, size = "medium" }: BadgeCardProps) => {
   };
 
   const getBadgeIcon = () => {
-    const badgeType = badge.badgeType || 'standard';
-    
+    const badgeType = badge.badgeType || "standard";
+
     switch (badgeType) {
-      case 'odyssey':
-      case 'journey':
+      case "odyssey":
+      case "journey":
         return {
-          icon: 'diamond',
+          icon: "diamond",
           color: COLORS.black,
           size: 16,
         };
-      case 'challenge':
-      case 'scoop':
-      case 'festival':
+      case "challenge":
+      case "scoop":
+      case "festival":
         return {
-          icon: 'diamond',
+          icon: "diamond",
           color: COLORS.badgeChallenge,
           size: 16,
         };
@@ -97,9 +97,9 @@ const BadgeCard = ({ badge, onPress, size = "medium" }: BadgeCardProps) => {
   };
 
   const getSpecialIcon = () => {
-    if (badge.specialIcon === '50') {
+    if (badge.specialIcon === "50") {
       return {
-        icon: '50',
+        icon: "50",
         color: COLORS.black,
         size: 14,
       };
@@ -124,25 +124,25 @@ const BadgeCard = ({ badge, onPress, size = "medium" }: BadgeCardProps) => {
           badge={badge}
           style={[styles.image, sizeStyles.image] as any}
         />
-        
+
         {/* Baner z tekstem (np. "Big Ben", "Chichen Itza") */}
         {badge.overlayText && (
           <View style={styles.overlayBanner}>
             <Text style={styles.overlayText}>{badge.overlayText}</Text>
           </View>
         )}
-        
+
         {/* Specjalna ikona odznaki (np. diament) */}
         {badgeIcon && (
           <View style={styles.badgeIconContainer}>
-            <Ionicons 
-              name={badgeIcon.icon as any} 
-              size={badgeIcon.size} 
-              color={badgeIcon.color} 
+            <Ionicons
+              name={badgeIcon.icon as any}
+              size={badgeIcon.size}
+              color={badgeIcon.color}
             />
           </View>
         )}
-        
+
         {/* Specjalna ikona (np. "50") */}
         {specialIcon && (
           <View style={styles.specialIconContainer}>
@@ -173,16 +173,16 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
     margin: SPACING.xs,
     ...SHADOWS.small,
-    position: 'relative',
+    position: "relative",
   },
   imageContainer: {
     alignItems: "center",
     justifyContent: "center",
     marginBottom: SPACING.sm,
-    position: 'relative',
+    position: "relative",
   },
   image: {
-    borderRadius: BORDER_RADIUS.sm,
+    borderRadius: 50, // Okrągły kształt
   },
   content: {
     flex: 1,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   overlayBanner: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 8,
     left: 8,
     right: 8,
@@ -214,12 +214,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: FONTS.sizes.xs,
     fontWeight: FONTS.weights.semibold,
-    textAlign: 'center',
+    textAlign: "center",
   },
   badgeIconContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
-    left: '50%',
+    left: "50%",
     marginLeft: -8,
     backgroundColor: COLORS.white,
     borderRadius: 10,
@@ -228,15 +228,15 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   specialIconContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     backgroundColor: COLORS.white,
     borderRadius: 10,
     width: 20,
     height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
     borderColor: COLORS.border,
   },
